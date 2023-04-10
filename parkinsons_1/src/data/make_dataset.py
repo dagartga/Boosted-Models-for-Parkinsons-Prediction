@@ -5,6 +5,10 @@ import numpy as np
 
 
 def preprocess_train_df(train_clin_df, train_prot_df, train_pep_df):
+    
+    # drop the medication column
+    train_clin_df = train_clin_df.drop(columns=['upd23b_clinical_state_on_medication'])
+    
     # create a column with the UniProt and Peptide name combined
     train_pep_df['peptide_uniprot'] = train_pep_df['Peptide'] + '_'+ train_pep_df['UniProt']
 
@@ -29,6 +33,7 @@ def preprocess_train_df(train_clin_df, train_prot_df, train_pep_df):
         to_remove = [updr for updr in updrs if updr != target]
         
         temp_train_df = full_train_df.drop(to_remove, axis=1)
+        temp_train_df = temp_train_df.dropna()
         
         temp_train_df.loc[:, "bins"] = pd.cut(temp_train_df[target], bins=num_bins, labels=False)
 
