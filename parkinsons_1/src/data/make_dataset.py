@@ -52,13 +52,15 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     full_train_df = preprocess_train_df(train_clin_df, train_prot_df, train_pep_df)
     
+    updrs = ['updrs_1', 'updrs_2', 'updrs_3', 'updrs_4']
     
     
-    for updrs in ['updrs_1', 'updrs_2', 'updrs_3', 'updrs_4']:
-        if updrs != assigned_updrs:
-            full_train_df = full_train_df.drop(updrs, axis=1)
-            stratified_kfold_df = stratified_kfold(full_train_df, 'target', 5, 42)
+    for updr in updrs:
+        target = updr
+        remove_updrs = [updr for updr in updrs if updr != target]
+        full_train_df = full_train_df.drop(remove_updrs, axis=1)
+        stratified_kfold_df = stratified_kfold(full_train_df, target, 5, 42)
     
-    write_to_csv(full_train_df, 'preprocessed_train_df.csv')
+        write_to_csv(full_train_df, f'{updr}_preprocessed_train_df.csv')
 
     
