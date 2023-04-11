@@ -1,6 +1,7 @@
 # src/train.py
 
 import joblib
+import numpy as np
 import pandas as pd
 from sklearn import metrics
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
@@ -12,20 +13,21 @@ def smape(y_true, y_pred):
     
     return round(np.mean(np.abs(y_pred - y_true) / ((np.abs(y_true) + np.abs(y_pred))/2)) * 100, 2)
 
+df.columns[-3:]
 
 def run(fold, target):
     
     # read the training data with folds
     df = pd.read_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_{target}.csv')
     
-    df_train = df[df['bins'] != fold].reset_index(drop=True)
+    df_train = df[df['kfold'] != fold].reset_index(drop=True)
     
-    df_valid = df[df['bins'] == fold].reset_index(drop=True)
+    df_valid = df[df['kfold'] == fold].reset_index(drop=True)
     
-    x_train = df_train.drop([target, 'bins'], axis=1).values
+    x_train = df_train.drop([target, 'kfold'], axis=1).values
     y_train = df_train[target].values
     
-    x_valid = df_valid.drop([target, 'bins'], axis=1).values
+    x_valid = df_valid.drop([target, 'kfold'], axis=1).values
     y_valid = df_valid[target].values
     
     clf = RandomForestClassifier(random_state = 42)

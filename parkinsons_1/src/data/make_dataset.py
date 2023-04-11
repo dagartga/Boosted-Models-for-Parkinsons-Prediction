@@ -40,7 +40,7 @@ def preprocess_train_df(train_clin_df, train_prot_df, train_pep_df):
         temp_train_df = full_train_df.drop(to_remove, axis=1)
         temp_train_df = temp_train_df.dropna()
         
-        temp_train_df.loc[:, "bins"] = pd.cut(temp_train_df[target], bins=num_bins, labels=False)
+        temp_train_df.loc[:, "kfold"] = pd.cut(temp_train_df[target], bins=num_bins, labels=False)
 
         temp_train_df.to_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1//data/processed/train_{target}.csv', index=False)
 
