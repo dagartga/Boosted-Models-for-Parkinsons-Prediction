@@ -8,6 +8,10 @@ from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 
 df = pd.read_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_updrs_1.csv')
 
+def smape(y_true, y_pred):
+    
+    return round(np.mean(np.abs(y_pred - y_true) / ((np.abs(y_true) + np.abs(y_pred))/2)) * 100, 2)
+
 
 def run(fold, target):
     
@@ -33,13 +37,20 @@ def run(fold, target):
     
     r2 = metrics.r2_score(y_valid, preds)
     mape = metrics.mean_absolute_percentage_error(y_valid, preds)
+    s_mape = smape(y_valid, preds)
     
-    print(f'Fold = {fold}, R2 = {r2}, MAPE = {mape}')
+    print(f'Fold = {fold}, SMAPE = {s_mape}, R2 = {r2}, MAPE = {mape}')
+    
+    return fold, s_mape, r2, mape
     
 if __name__ == '__main__':
     
     for target in ['updrs_1']:
-        for fold in range(2):
-            run(fold, target)
+        all_smapes = []
+        for fold in range(5):
+            f, s, r, m = run(fold, target)
+            all_smapes.append(s)
+            
+        print(f'Average SMAPE for {target} = {np.mean(all_smapes)}')
             
     
