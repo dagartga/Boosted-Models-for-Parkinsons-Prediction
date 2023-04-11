@@ -40,7 +40,18 @@ def preprocess_train_df(train_clin_df, train_prot_df, train_pep_df):
         temp_train_df = full_train_df.drop(to_remove, axis=1)
         temp_train_df = temp_train_df.dropna()
         
-        temp_train_df.loc[:, "kfold"] = pd.cut(temp_train_df[target], bins=num_bins, labels=False)
+        # initiate the kfold class from sklearn
+        kf = StratifiedKFold(n_splits=5)
+        
+        # create a kfold column
+        temp_train_df['kfold'] = -1
+
+        # fill the kfold column
+        for f, (t_, v_) in enumerate(kf.split(X=temp_train_df, y=temp_train_df['bins'].values)):
+            temp_train_df.loc[v_, 'kfold'] = f
+            
+        # drop the bins column
+        temp_train_df = temp_train_df.drop('bins', axis=1)
 
         temp_train_df.to_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1//data/processed/train_{target}.csv', index=False)
 
