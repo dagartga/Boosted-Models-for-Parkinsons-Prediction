@@ -26,7 +26,7 @@ def preprocess_train_df(train_clin_df, train_prot_df, train_pep_df):
 
     full_train_df = train_clin_df.merge(full_prot_train_df, how='inner', left_on='visit_id', right_on='visit_id')
     full_train_df = full_train_df.sample(frac=1).reset_index(drop=True)
-    num_bins = int(np.floor(1 + np.log2(len(full_train_df))))
+
 
     scaler = StandardScaler()
     full_train_df.iloc[:, 7:] = scaler.fit_transform(full_train_df.iloc[:, 7:])
@@ -44,6 +44,7 @@ def preprocess_train_df(train_clin_df, train_prot_df, train_pep_df):
         num_bins = int(np.floor(1 + np.log2(len(full_train_df))))
         temp_train_df.loc[:, "bins"] = pd.cut(temp_train_df[target], bins=num_bins, labels=False)
 
+        temp_train_df = temp_train_df.dropna().reset_index(drop=True)
         
         # initiate the kfold class from sklearn
         kf = StratifiedKFold(n_splits=5)
