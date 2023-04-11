@@ -1,21 +1,24 @@
 # src/train.py
 
+import os
+import argparse
+
 import joblib
 import numpy as np
 import pandas as pd
 from sklearn import metrics
-from sklearn.ensemble import RandomForestRegressor
+
+import model_dispatcher
 
 
 
 def smape(y_true, y_pred):
-    
+
     return round(np.mean(np.abs(y_pred - y_true) / ((np.abs(y_true) + np.abs(y_pred))/2)) * 100, 2)
 
 
 
-def run(fold, target):
-    
+def run(fold=0, model='randomforest_reg', target='updrs_1'):
     # read the training data with folds
     df = pd.read_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_{target}.csv')
     df = df.drop(columns=['visit_id', 'patient_id'])
@@ -30,7 +33,7 @@ def run(fold, target):
     x_valid = df_valid.drop([target, 'kfold'], axis=1).values
     y_valid = df_valid[target].values
     
-    clf = RandomForestRegressor(random_state = 42)
+    clf = model_dispatcher.models[model]
     clf.fit(x_train, y_train)
     preds = clf.predict(x_valid)
     
@@ -45,14 +48,21 @@ def run(fold, target):
     
     return fold, s_mape, r2, mape
     
+    
+    
 if __name__ == '__main__':
     
-    for target in ['updrs_1', 'updrs_2', 'updrs_3', 'updrs_4']:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--fold', type=int, required=True)
+    parser.add_argument('--model', type=str, required=True)
+    args = parser.parse_args()
+    
+    for updrs in ['updrs_1']:
         all_smapes = []
-        for fold in range(1):
-            f, s, r, m = run(fold, target)
-            all_smapes.append(s)
-            
-        print(f'Average SMAPE for {target} = {np.mean(all_smapes)}')
+        
+        f, s, r, m = run(fold=args.fold, model=args.model, target=updrs)
+        all_smapes.append(s)
+        
+        print(f'Average SMAPE for {updrs} = {np.mean(all_smapes)}')
             
     
