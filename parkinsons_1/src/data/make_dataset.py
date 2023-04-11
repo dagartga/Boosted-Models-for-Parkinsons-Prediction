@@ -34,11 +34,16 @@ def preprocess_train_df(train_clin_df, train_prot_df, train_pep_df):
     updrs = ['updrs_1', 'updrs_2', 'updrs_3', 'updrs_4']
 
     for target in updrs:
-        
+    
         to_remove = [updr for updr in updrs if updr != target]
         
         temp_train_df = full_train_df.drop(to_remove, axis=1)
         temp_train_df = temp_train_df.dropna()
+        
+        # calculate the number of bins by Sturge's rule
+        num_bins = int(np.floor(1 + np.log2(len(full_train_df))))
+        temp_train_df.loc[:, "bins"] = pd.cut(temp_train_df[target], bins=num_bins, labels=False)
+
         
         # initiate the kfold class from sklearn
         kf = StratifiedKFold(n_splits=5)
