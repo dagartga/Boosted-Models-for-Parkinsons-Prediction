@@ -49,7 +49,7 @@ if __name__ == '__main__':
     
     for target in ['updrs_1', 'updrs_2', 'updrs_3', 'updrs_4']:
         all_smapes = []
-        for fold in range(5):
+        for fold in range(1):
             f, s, r, m = run(fold, target)
             all_smapes.append(s)
             
