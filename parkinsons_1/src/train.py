@@ -4,21 +4,21 @@ import joblib
 import numpy as np
 import pandas as pd
 from sklearn import metrics
-from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor
 
 
-df = pd.read_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_updrs_1.csv')
 
 def smape(y_true, y_pred):
     
     return round(np.mean(np.abs(y_pred - y_true) / ((np.abs(y_true) + np.abs(y_pred))/2)) * 100, 2)
 
-df.columns[-3:]
+
 
 def run(fold, target):
     
     # read the training data with folds
     df = pd.read_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_{target}.csv')
+    df = df.drop(columns=['visit_id', 'patient_id'])
     
     df_train = df[df['kfold'] != fold].reset_index(drop=True)
     
@@ -30,7 +30,7 @@ def run(fold, target):
     x_valid = df_valid.drop([target, 'kfold'], axis=1).values
     y_valid = df_valid[target].values
     
-    clf = RandomForestClassifier(random_state = 42)
+    clf = RandomForestRegressor(random_state = 42)
     clf.fit(x_train, y_train)
     preds = clf.predict(x_valid)
     
@@ -47,7 +47,7 @@ def run(fold, target):
     
 if __name__ == '__main__':
     
-    for target in ['updrs_1']:
+    for target in ['updrs_1', 'updrs_2', 'updrs_3', 'updrs_4']:
         all_smapes = []
         for fold in range(5):
             f, s, r, m = run(fold, target)
