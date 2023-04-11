@@ -1,7 +1,9 @@
 
 import pandas as pd
 from sklearn.model_selection import StratifiedKFold
+from sklearn.preprocessing import StandardScaler
 import numpy as np
+
 
 
 def preprocess_train_df(train_clin_df, train_prot_df, train_pep_df):
@@ -26,6 +28,9 @@ def preprocess_train_df(train_clin_df, train_prot_df, train_pep_df):
     full_train_df = full_train_df.sample(frac=1).reset_index(drop=True)
     num_bins = int(np.floor(1 + np.log2(len(full_train_df))))
 
+    scaler = StandardScaler()
+    full_train_df.iloc[:, 7:] = scaler.fit_transform(full_train_df.iloc[:, 7:])
+    
     updrs = ['updrs_1', 'updrs_2', 'updrs_3', 'updrs_4']
 
     for target in updrs:
