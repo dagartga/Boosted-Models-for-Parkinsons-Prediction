@@ -75,6 +75,8 @@ if __name__ == '__main__':
     
     results_df = pd.DataFrame(results).set_index('Model')
     results_df.to_csv('~/parkinsons_proj_1/parkinsons_project/parkinsons_1/models/model_results/baseline_results.csv')
-    best_model = results_df.groupby('Model')['SMAPE'].mean().sort_values().reset_index().iloc[0,:]
-    print('Best model is: ', best_model['Model'])
-    print('Best model SMAPE is: ', best_model['SMAPE'])
+    for target in ['updrs_1', 'updrs_2', 'updrs_3', 'updrs_4']:
+        updr_results_df[results_df['Target'] = target]
+        best_model = updr_results_df.groupby('Model')['SMAPE'].mean().sort_values().reset_index().iloc[0,:]
+        print(f'For {target} the best model is: ', best_model['Model'])
+        print(f'For {target} best model SMAPE is: ', best_model['SMAPE'])
