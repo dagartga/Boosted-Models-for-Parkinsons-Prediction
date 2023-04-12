@@ -1,4 +1,4 @@
-# src/train.py
+# src/train_1.py
 
 import os
 import argparse
@@ -19,10 +19,14 @@ def smape(y_true, y_pred):
 
 
 
-def run(fold, model, target):
+def run(fold, model, target, month_diff):
     # read the training data with folds
-    df = pd.read_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_{target}.csv')
-    df = df.drop(columns=['visit_id', 'patient_id'])
+    df = pd.read_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/forecast_train_{target}.csv')
+    # change target to the updrs_diff
+    target = f'{target}_diff'
+    
+    df = df.drop(columns=['visit_id', 'patient_id', 'visit_month'])
+    df = df[df['visit_month_diff'] == month_diff]
     
     df_train = df[df['kfold'] != fold].reset_index(drop=True)
     
@@ -67,14 +71,15 @@ if __name__ == '__main__':
     
     for model_name, model in models:
         for target in ['updrs_1', 'updrs_2', 'updrs_3', 'updrs_4']:
-            for fold in range(5):
-                print('Running model: ', model_name, 'for target: ', target, 'for fold: ', fold)
-                f, s, r, m = run(fold, model, target)
-                results.append({"Model":model_name, "Target":target, "Fold":f, "SMAPE":s, "R2":r, "MAPE":m})
-                print('SMAPE: ', s, 'R2: ', r, 'MAPE: ', m, '\n')
+            for month_diff in [6, 12, 24]:
+                for fold in range(5):
+                    print('Running model: ', model_name, 'for target: ', target, 'for month_diff: ', month_diff, 'for fold: ', fold)
+                    f, s, r, m = run(fold, model, target, month_diff)
+                    results.append({"Model":model_name, "Target":target, "Month_Diff":month_diff, "Fold":f, "SMAPE":s, "R2":r, "MAPE":m})
+                    print('SMAPE: ', s, 'R2: ', r, 'MAPE: ', m, '\n')
     
     results_df = pd.DataFrame(results).set_index('Model')
-    results_df.to_csv('~/parkinsons_proj_1/parkinsons_project/parkinsons_1/models/model_results/baseline_results.csv')
+    results_df.to_csv('~/parkinsons_proj_1/parkinsons_project/parkinsons_1/models/model_results/baseline_forecast_results.csv')
     for target in ['updrs_1', 'updrs_2', 'updrs_3', 'updrs_4']:
         updr_results_df = results_df[results_df['Target'] == target]
         best_model = updr_results_df.groupby('Model')['SMAPE'].mean().sort_values().reset_index().iloc[0,:]
