@@ -18,7 +18,7 @@ def smape(y_true, y_pred):
 
 
 
-def run(fold=0, model='randomforest_reg', target='updrs_1'):
+def run(fold, model, target):
     # read the training data with folds
     df = pd.read_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_{target}.csv')
     df = df.drop(columns=['visit_id', 'patient_id'])
@@ -55,14 +55,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--fold', type=int, required=True)
     parser.add_argument('--model', type=str, required=True)
+    parser.add_argument('--target', type=str, required=True)
     args = parser.parse_args()
     
-    for updrs in ['updrs_1']:
-        all_smapes = []
-        
-        f, s, r, m = run(fold=args.fold, model=args.model, target=updrs)
-        all_smapes.append(s)
-        
-        print(f'Average SMAPE for {updrs} = {np.mean(all_smapes)}')
+    fold, smape, r2, mape = run(fold=args.fold, model=args.model, target=args.target)
+    
             
+    print(f'Mean SMAPE for {args.target} = {smape}')
     
