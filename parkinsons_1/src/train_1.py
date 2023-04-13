@@ -7,6 +7,7 @@ import joblib
 import numpy as np
 import pandas as pd
 from sklearn import metrics
+from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
 from lightgbm import LGBMRegressor
@@ -19,7 +20,7 @@ def smape(y_true, y_pred):
 
 
 
-def run(fold, model, target, month_diff):
+def run(model, target, month_diff):
     # read the training data with folds
     df = pd.read_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/forecast_train_{target}.csv')
     # change target to the updrs_diff
@@ -28,15 +29,11 @@ def run(fold, model, target, month_diff):
     df = df.drop(columns=['visit_id', 'patient_id', 'visit_month'])
     df = df[df['visit_month_diff'] == month_diff]
     
-    df_train = df[df['kfold'] != fold].reset_index(drop=True)
+    x_train, x_valid, y_train, y_valid = train_test_split(df, df[target], test_size=0.2, random_state=42)
     
-    df_valid = df[df['kfold'] == fold].reset_index(drop=True)
-    
-    x_train = df_train.drop([target, 'kfold'], axis=1).values
-    y_train = df_train[target].values
-    
-    x_valid = df_valid.drop([target, 'kfold'], axis=1).values
-    y_valid = df_valid[target].values
+    x_train = x_train.drop([target, 'kfold'], axis=1).values
+    x_valid = x_valid.drop([target, 'kfold'], axis=1).values
+
     
     reg = model
     reg.fit(x_train, y_train)
@@ -50,7 +47,7 @@ def run(fold, model, target, month_diff):
     # save the model    
     #joblib.dump(clf, f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/models/{target}_model_{fold}.bin')
     
-    return fold, s_mape, r2, mape
+    return s_mape, r2, mape
             
             
     
@@ -72,10 +69,10 @@ if __name__ == '__main__':
     for model_name, model in models:
         for target in ['updrs_1', 'updrs_2', 'updrs_3', 'updrs_4']:
             for month_diff in [6, 12, 24]:
-                for fold in range(5):
-                    print('Running model: ', model_name, 'for target: ', target, 'for month_diff: ', month_diff, 'for fold: ', fold)
-                    f, s, r, m = run(fold, model, target, month_diff)
-                    results.append({"Model":model_name, "Target":target, "Month_Diff":month_diff, "Fold":f, "SMAPE":s, "R2":r, "MAPE":m})
+                
+                    print('Running model: ', model_name, 'for target: ', target, 'for month_diff: ', month_diff)
+                    s, r, m = run(model, target, month_diff)
+                    results.append({"Model":model_name, "Target":target, "Month_Diff":month_diff, "SMAPE":s, "R2":r, "MAPE":m})
                     print('SMAPE: ', s, 'R2: ', r, 'MAPE: ', m, '\n')
     
     results_df = pd.DataFrame(results).set_index('Model')
