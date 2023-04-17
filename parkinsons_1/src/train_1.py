@@ -14,6 +14,7 @@ from lightgbm import LGBMRegressor
 
 
 
+
 def smape(y_true, y_pred):
 
     return round(np.mean(np.abs(y_pred - y_true) / ((np.abs(y_true) + np.abs(y_pred))/2)) * 100, 2)
@@ -23,16 +24,22 @@ def smape(y_true, y_pred):
 def run(model, target, month_diff):
     # read the training data with folds
     df = pd.read_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/forecast_train_{target}.csv')
-    # change target to the updrs_diff
-    target = f'{target}_diff'
     
-    df = df.drop(columns=['visit_id', 'patient_id', 'visit_month'])
-    df = df[df['visit_month_diff'] == month_diff]
+    forecast_cols = [col for col in df.columns if 'updrs' in col]
+
+    drop_cols = [col for col in forecast_cols if col not in  [f'{target}_0', f'{target}_{month_diff}']]
+
+    df = df.drop(columns=drop_cols)
+    df = df.drop(columns=['visit_id', 'visit_month'])
     
-    x_train, x_valid, y_train, y_valid = train_test_split(df, df[target], test_size=0.2, random_state=42)
+    target_mo = f'{target}_{month_diff}'
+    # drop nan rows for target column
+    df = df.dropna(subset=[target_mo])
     
-    x_train = x_train.drop([target, 'kfold'], axis=1).values
-    x_valid = x_valid.drop([target, 'kfold'], axis=1).values
+    x_train, x_valid, y_train, y_valid = train_test_split(df, df[target_mo], test_size=0.2, random_state=42)
+    
+    x_train = x_train.drop([target_mo], axis=1).values
+    x_valid = x_valid.drop([target_mo], axis=1).values
 
     
     reg = model
@@ -51,9 +58,7 @@ def run(model, target, month_diff):
             
             
     
-        
-    
-    
+            
     
     
     
