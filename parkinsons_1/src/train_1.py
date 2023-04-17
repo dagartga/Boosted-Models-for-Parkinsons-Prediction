@@ -19,9 +19,8 @@ def smape(y_true, y_pred):
 
     return round(np.mean(np.abs(y_pred - y_true) / ((np.abs(y_true) + np.abs(y_pred))/2)) * 100, 2)
 
-model = RandomForestRegressor(random_state = 42)
-target = 'updrs_1'
-month_diff = '12'
+
+
 
 def run(model, target, month_diff):
     # read the training data with folds
