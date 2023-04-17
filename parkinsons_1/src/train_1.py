@@ -19,7 +19,9 @@ def smape(y_true, y_pred):
 
     return round(np.mean(np.abs(y_pred - y_true) / ((np.abs(y_true) + np.abs(y_pred))/2)) * 100, 2)
 
-
+model = RandomForestRegressor(random_state = 42)
+target = 'updrs_1'
+month_diff = '12'
 
 def run(model, target, month_diff):
     # read the training data with folds
@@ -74,11 +76,13 @@ if __name__ == '__main__':
     for model_name, model in models:
         for target in ['updrs_1', 'updrs_2', 'updrs_3', 'updrs_4']:
             for month_diff in [6, 12, 24]:
-                
+                try:
                     print('Running model: ', model_name, 'for target: ', target, 'for month_diff: ', month_diff)
                     s, r, m = run(model, target, month_diff)
                     results.append({"Model":model_name, "Target":target, "Month_Diff":month_diff, "SMAPE":s, "R2":r, "MAPE":m})
                     print('SMAPE: ', s, 'R2: ', r, 'MAPE: ', m, '\n')
+                except:
+                    print('Error running model: ', model_name, 'for target: ', target, 'for month_diff: ', month_diff, '\n')
     
     results_df = pd.DataFrame(results).set_index('Model')
     results_df.to_csv('~/parkinsons_proj_1/parkinsons_project/parkinsons_1/models/model_results/baseline_forecast_results.csv')
