@@ -7,9 +7,9 @@ import joblib
 import numpy as np
 import pandas as pd
 from sklearn import metrics
-
-import model_dispatcher
-
+from sklearn.ensemble import RandomForestRegressor
+from xgboost import XGBRegressor
+from lightgbm import LGBMRegressor
 
 
 def smape(y_true, y_pred):
@@ -33,12 +33,10 @@ def run(fold, model, target):
     x_valid = df_valid.drop([target, 'kfold'], axis=1).values
     y_valid = df_valid[target].values
     
-    clf = model_dispatcher.models[model]
-    clf.fit(x_train, y_train)
-    preds = clf.predict(x_valid)
+    reg = model
+    reg.fit(x_train, y_train)
+    preds = reg.predict(x_valid)
     
-    # save the model    
-    #joblib.dump(clf, f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/models/{target}_model_{fold}.bin')
     
     r2 = metrics.r2_score(y_valid, preds)
     mape = metrics.mean_absolute_percentage_error(y_valid, preds)
@@ -52,14 +50,29 @@ def run(fold, model, target):
     
 if __name__ == '__main__':
     
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--fold', type=int, required=True)
-    parser.add_argument('--model', type=str, required=True)
-    parser.add_argument('--target', type=str, required=True)
-    args = parser.parse_args()
+    models = [('rf_reg', RandomForestRegressor(random_state = 42)),
+              ('xgboost', XGBRegressor(random_state = 42)),
+              ('lgbm', LGBMRegressor(random_state = 42))]
     
-    fold, smape, r2, mape = run(fold=args.fold, model=args.model, target=args.target)
+    results = []
     
-            
-    print(f'Mean SMAPE for {args.target} = {smape}')
+    for model_name, model in models:
+        for target in ['updrs_1', 'updrs_2', 'updrs_3', 'updrs_4']:
+            for fold in [0, 1, 2, 3, 4]:
+                try:
+                    print('Running model: ', model_name, 'for target: ', target, 'fold: ', fold)
+                    f, s, r, m = run(fold, model, target)
+                    results.append({"Model":model_name, "Target":target, "Fold":f, "SMAPE":s, "R2":r, "MAPE":m})
+                    print('SMAPE: ', s, 'R2: ', r, 'MAPE: ', m, '\n')
+                except:
+                    print('Error running model: ', model_name, 'for target: ', target, 'for fold: ', fold, '\n')
+    
+    results_df = pd.DataFrame(results).set_index('Model')
+    results_df.to_csv('~/parkinsons_proj_1/parkinsons_project/parkinsons_1/models/model_results/baseline_updrs0_results.csv')
+    for target in ['updrs_1', 'updrs_2', 'updrs_3', 'updrs_4']:
+        updr_results_df = results_df[results_df['Target'] == target]
+        best_model = updr_results_df.groupby('Model')['SMAPE'].mean().sort_values().reset_index().iloc[0,:]
+        print(f'For {target} the best model is: ', best_model['Model'])
+        print(f'For {target} best model SMAPE is: ', best_model['SMAPE'])
+    
     

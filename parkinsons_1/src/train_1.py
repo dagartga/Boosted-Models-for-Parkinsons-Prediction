@@ -52,9 +52,6 @@ def run(model, target, month_diff):
     s_mape = smape(y_valid, preds)
     
     
-    # save the model    
-    #joblib.dump(clf, f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/models/{target}_model_{fold}.bin')
-    
     return s_mape, r2, mape
             
             
