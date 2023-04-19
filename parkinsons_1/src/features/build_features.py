@@ -26,6 +26,8 @@ def multiply_columns(df):
 
 def prot_prot_interaction(df):
     
+    other_info = df[['visit_id', 'patient_id', 'kfold']].copy(deep=True)
+    
     for col in ['visit_id', 'patient_id', 'kfold']:
         if col in df.columns:
             df = df.drop(columns=col)
@@ -37,6 +39,8 @@ def prot_prot_interaction(df):
     cols_to_combine = [col for col in df.columns if col in unique_prot]
     
     combined_df = multiply_columns(df[cols_to_combine])
+    
+    combined_df = pd.concat([other_info, combined_df], axis=1)
     
     return combined_df
 
@@ -76,12 +80,12 @@ if __name__ == '__main__':
     
     
     df = pd.read_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_updrs_1.csv')
-    
+        
     start_time = time.time()
     new_feat_df = prot_prot_interaction(df)
     
     # save the new features
-    new_feat_df.to_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_updrs_1_new_feats.csv')
+    new_feat_df.to_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_updrs_1_new_feats.csv', index=False)
     
     end_time = time.time()
 
@@ -100,3 +104,6 @@ if __name__ == '__main__':
 
     # elapsed_time = end_time - start_time
     # print(f"Elapsed time: {elapsed_time:.2f} seconds")
+    
+    import pandas as pd
+    new_feat_df = pd.read_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_updrs_1_new_feats.csv')
