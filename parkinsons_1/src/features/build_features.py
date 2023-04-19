@@ -31,7 +31,7 @@ def prot_prot_interaction(df):
             df = df.drop(columns=col)
     
     train_prot_df = pd.read_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/raw/train_proteins.csv')
-
+    
     unique_prot = train_prot_df['UniProt'].unique()
 
     cols_to_combine = [col for col in df.columns if col in unique_prot]
@@ -39,6 +39,37 @@ def prot_prot_interaction(df):
     combined_df = multiply_columns(df[cols_to_combine])
     
     return combined_df
+
+
+# def pept_prot_interaction(df, batch_size=20):
+    
+#     for col in ['visit_id', 'patient_id', 'kfold']:
+#         if col in df.columns:
+#             df = df.drop(columns=col)
+            
+#     train_pept_df = pd.read_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/raw/train_peptides.csv')
+#     train_prot_df = pd.read_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/raw/train_proteins.csv')
+
+#     unique_pept = train_pept_df['Peptide'].unique()
+#     unique_prot = train_prot_df['UniProt'].unique()
+    
+#     pept_dict = train_pept_df.groupby('Peptide')['UniProt'].max().to_dict()
+
+#     combined_df = pd.DataFrame()
+#     temp_df = pd.DataFrame()
+
+
+#     for pept in unique_pept[:batch_size]:
+#         for prot in unique_prot:
+#             if pept_dict[pept] != prot:
+#                 uniprot = pept_dict[pept]
+#                 pept_col = f'{pept}_{uniprot}'
+#                 temp_df[f'{pept}_x_{prot}'] = df[pept_col] * df[prot]
+#                 combined_df = pd.concat([combined_df, temp_df], axis=1)
+
+#     combined_df = pd.concat([df, combined_df], axis=1)
+    
+#     return combined_df
 
 
 if __name__ == '__main__':
@@ -56,3 +87,16 @@ if __name__ == '__main__':
 
     elapsed_time = end_time - start_time
     print(f"Elapsed time: {elapsed_time:.2f} seconds")
+    
+    ## This feature engineering takes too long and is memory intensive. I will have to find a way to do this in batches.
+    # create the peptide-protein interaction features
+    # start_time = time.time()
+    # new_feat_df = pept_prot_interaction(df)
+    
+    # # save the new features
+    # new_feat_df.to_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_updrs_1_pept_prot_feats_20.csv')
+    
+    # end_time = time.time()
+
+    # elapsed_time = end_time - start_time
+    # print(f"Elapsed time: {elapsed_time:.2f} seconds")
