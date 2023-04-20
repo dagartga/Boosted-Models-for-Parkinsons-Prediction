@@ -7,10 +7,10 @@ def combine_datasets(target):
     df2 = pd.read_csv('~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_data_new_feats.csv')
     
     # get the columns to keep from each df
-    df_cols = ['visit_id', 'patient_id', 'kfold', 'visit_month', 'updrs_1']
+    df_cols = ['visit_id', 'patient_id', 'kfold', 'visit_month', target]
     df2 = df2.drop(columns = ['patient_id', 'kfold'])
     # merge the data together with the necessary columns
-    df = df[train_cols].merge(df2, how='left', left_on='visit_id', right_on='visit_id')
+    df = df[df_cols].merge(df2, how='left', left_on='visit_id', right_on='visit_id')
     
     df.to_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_new_feats_{target}.csv', index=False)
     
