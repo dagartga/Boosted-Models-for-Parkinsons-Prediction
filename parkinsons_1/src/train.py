@@ -21,6 +21,8 @@ def smape(y_true, y_pred):
 def run(fold, model, target):
     # read the training data with folds
     df = pd.read_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_{target}.csv')
+ 
+    # remove unnecessary columns
     df = df.drop(columns=['visit_id', 'patient_id'])
     
     df_train = df[df['kfold'] != fold].reset_index(drop=True)
@@ -57,7 +59,7 @@ if __name__ == '__main__':
     results = []
     
     for model_name, model in models:
-        for target in ['updrs_1', 'updrs_2', 'updrs_3', 'updrs_4']:
+        for target in ['updrs_1']:
             for fold in [0, 1, 2, 3, 4]:
                 try:
                     print('Running model: ', model_name, 'for target: ', target, 'fold: ', fold)
