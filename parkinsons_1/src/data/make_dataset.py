@@ -68,3 +68,5 @@ if __name__ == '__main__':
     train_pep_df = pd.read_csv('~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/raw/train_peptides.csv')
     
     preprocess_train_df(train_clin_df, train_prot_df, train_pep_df)
+    
+    
