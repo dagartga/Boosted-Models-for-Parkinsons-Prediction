@@ -23,10 +23,13 @@ def smape(y_true, y_pred):
 
 def run(fold, model, target):
     # read the training data with folds
-    df = pd.read_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_new_feats_{target}.csv')
+    df = pd.read_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_{target}.csv')
  
     # remove unnecessary columns
     df = df.drop(columns=['visit_id', 'patient_id'])
+    
+    # fill na with 0
+    df = df.fillna(0)
     
     df_train = df[df['kfold'] != fold].reset_index(drop=True)
     
@@ -76,7 +79,6 @@ if __name__ == '__main__':
                     f, s, r, m, feat_scores = run(fold, model, target)
                     results.append({"Model":model_name, "Target":target, "Fold":f, "SMAPE":s, "R2":r, "MAPE":m})
                     print('SMAPE: ', s, 'R2: ', r, 'MAPE: ', m, '\n')
-                    feat_scores.to_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/models/model_results/feature_scores/{model_name}_{target}_{fold}_{date}.csv')
                 except:
                     print('Error running model: ', model_name, 'for target: ', target, 'for fold: ', fold, '\n')
     
