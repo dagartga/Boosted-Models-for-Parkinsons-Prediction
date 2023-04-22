@@ -20,6 +20,11 @@ def run(model, target, month_diff):
     # read the training data with folds
     df = pd.read_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/forecast_train_{target}.csv')
     
+    month_diff = 6
+    target = 'updrs_4'
+    df = pd.read_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/forecast_train_{target}.csv')
+    
+    
     forecast_cols = [col for col in df.columns if 'updrs' in col]
 
     drop_cols = [col for col in forecast_cols if col not in  [f'{target}_0', f'{target}_{month_diff}']]
@@ -70,6 +75,7 @@ if __name__ == '__main__':
                     model_file = f'../models/model_{model_name}_{target}_{month_diff}.pkl'
                     pickle.dump(model, open(model_file, 'wb'))
                 except:
+                    print('---------------------------------------------------')
                     print('Error running model: ', model_name, 'for target: ', target, '\n')
         
     results_df = pd.DataFrame(results).set_index('Model')
