@@ -1,6 +1,5 @@
 import pandas as pd
 import pickle
-from pathlib import Path
 
 
 
@@ -54,13 +53,14 @@ for updr in ['updrs_1', 'updrs_2', 'updrs_3', 'updrs_4']:
     
     for month in [0, 6, 12, 24]:
         # Load the saved model from file
-        model_path = Path('~/parkinsons_proj_1/parkinsons_project/parkinsons_1/models/model_rf_reg_updrs_1_0.pkl')
+        model_path = f'..\models\model_rf_reg_updrs_1_0.pkl'
         
         with open(model_path, 'rb') as f:
             rf_reg = pickle.load(f)
 
         # Use the imported model to make predictions
-        y_pred = rfc.predict(model_df)
+        y_pred = rf_reg.predict(model_df)
+        
 
     
 
