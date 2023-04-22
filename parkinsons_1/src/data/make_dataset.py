@@ -1,12 +1,11 @@
 
 import pandas as pd
 from sklearn.model_selection import StratifiedKFold
-from sklearn.preprocessing import StandardScaler
 import numpy as np
 
 
 
-def preprocess_train_df(train_clin_df, train_prot_df, train_pep_df):
+def preprocess_train_df(train_clin_df, train_prot_df, train_pep_df, save_data=False):
     
     # drop the medication column
     train_clin_df = train_clin_df.drop(columns=['upd23b_clinical_state_on_medication'])
@@ -27,11 +26,10 @@ def preprocess_train_df(train_clin_df, train_prot_df, train_pep_df):
     full_train_df = train_clin_df.merge(full_prot_train_df, how='inner', left_on='visit_id', right_on='visit_id')
     full_train_df = full_train_df.sample(frac=1).reset_index(drop=True)
 
-
-    scaler = StandardScaler()
-    full_train_df.iloc[:, 7:] = scaler.fit_transform(full_train_df.iloc[:, 7:])
     
     updrs = ['updrs_1', 'updrs_2', 'updrs_3', 'updrs_4']
+
+    final_dfs = dict()
 
     for target in updrs:
     
@@ -58,8 +56,14 @@ def preprocess_train_df(train_clin_df, train_prot_df, train_pep_df):
             
         # drop the bins column
         temp_train_df = temp_train_df.drop('bins', axis=1)
+        
+        if save_data:        
+            temp_train_df.to_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1//data/processed/train_{target}.csv', index=False)
 
-        temp_train_df.to_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1//data/processed/train_{target}.csv', index=False)
+        else:
+            final_dfs[target] = temp_train_df
+            
+    return final_dfs
 
 if __name__ == '__main__':
     
@@ -67,6 +71,6 @@ if __name__ == '__main__':
     train_prot_df = pd.read_csv('~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/raw/train_proteins.csv')
     train_pep_df = pd.read_csv('~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/raw/train_peptides.csv')
     
-    preprocess_train_df(train_clin_df, train_prot_df, train_pep_df)
+    preprocess_train_df(train_clin_df, train_prot_df, train_pep_df, save_data=True)
     
     
