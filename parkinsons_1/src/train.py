@@ -19,6 +19,9 @@ def smape(y_true, y_pred):
 
     return round(np.mean(np.abs(y_pred - y_true) / ((np.abs(y_true) + np.abs(y_pred))/2)) * 100, 2)
 
+target = 'updrs_1'
+df = pd.read_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/raw/train_clinical_data.csv')
+
 
 
 def run(fold, model, target):
@@ -64,8 +67,9 @@ if __name__ == '__main__':
     date = dt.date.today()
     date = date.strftime('%Y-%m-%d')
     
+    
 
-    models = [('rf_reg', RandomForestRegressor(random_state = 42)),
+    models = [('rf_reg', RandomForestRegressor(min_samples_split=25, n_estimators=200, max_features='sqrt', random_state = 42)),
               ('xgboost', XGBRegressor(random_state = 42)),
               ('lgbm', LGBMRegressor(random_state = 42))]
     

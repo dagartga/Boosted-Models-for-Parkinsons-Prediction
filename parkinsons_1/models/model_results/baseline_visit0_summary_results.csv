@@ -1,4 +1,4 @@
 ,Model,SMAPE
-0,rf_reg,97.016
-1,lgbm,97.0775
-2,xgboost,98.878
+0,lgbm,96.494
+1,rf_reg,97.965
+2,xgboost,98.41499999999999
