@@ -3,7 +3,7 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 import itertools
 
-updr = "updrs_1"
+updr = "updrs_2"
 patient_id = 55
 
 
@@ -101,8 +101,10 @@ if __name__ == "__main__":
             temp_df = calculate_updrs_diff(forecast_df, patient_id, updr)
             final_forecast_df = pd.concat([final_forecast_df, temp_df])
 
-    # save the final results
-    final_forecast_df.to_csv(
-        "~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_forecast_visitdiff_data.csv",
-        index=False,
-    )
+        # save the final results
+        final_forecast_df.to_csv(
+            f"~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_forecast_visitdiff_data_{updr}.csv",
+            index=False,
+        )
+
+        final_forecast_df = pd.DataFrame()
