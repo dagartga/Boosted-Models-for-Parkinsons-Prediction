@@ -44,7 +44,7 @@ def run(model, target):
     
 if __name__ == '__main__':
     
-    models = [('rf_reg', RandomForestRegressor(random_state = 42))]
+    models = [('rf_reg', RandomForestRegressor(n_estimators = 200, min_samples_split=25, max_features=25, random_state = 42))]
     
     results = []
     

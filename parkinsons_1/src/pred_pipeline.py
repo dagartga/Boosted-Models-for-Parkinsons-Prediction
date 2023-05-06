@@ -1,6 +1,7 @@
 import pandas as pd
 import pickle
 
+import datetime as dt
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -138,7 +139,8 @@ def create_submission_df(test_df, prot_test_df, pep_test_df, save_data=False):
             submit_df = submit_df.append({'prediction_id': row['row_id']+'_'+col, 'rating': row[col], 'group_key': row['group_key']}, ignore_index=True)
 
     if save_data:
-        submit_df.to_csv(f'../data/submission.csv', index=False)
+        date = dt.datetime.today().strftime("%Y-%m-%d")
+        submit_df.to_csv(f'../data/submission_{date}.csv', index=False)
 
 
     
