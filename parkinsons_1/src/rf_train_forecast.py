@@ -19,6 +19,9 @@ def smape(y_true, y_pred):
     )
 
 
+target = "updrs_1"
+
+
 def run(model, target, month_diff):
     # read the training data with folds
     df = pd.read_csv(
