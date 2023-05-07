@@ -150,12 +150,14 @@ def forecast_updr(testing, model, updr, month_diff):
 
     preds = rf_reg.predict(new_test_df.values)
 
-    new_test_df[f"{updr}_plus_{month_diff}"] = new_test_df[updr] + preds
+    new_test_df[f"{updr}_plus_{month_diff}_months"] = new_test_df[updr] + preds
 
     return new_test_df
 
 
 if __name__ == "__main__":
+    date = dt.datetime.now().strftime("%Y-%m-%d")
+
     test_df = pd.read_csv(
         "~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/raw/test.csv"
     )
@@ -166,7 +168,7 @@ if __name__ == "__main__":
         "~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/raw/test_peptides.csv"
     )
 
-    testing = create_first_prediction_df(
+    first_preds_df = create_first_prediction_df(
         test_df, prot_test_df, pep_test_df, save_data=True
     )
 
@@ -175,13 +177,66 @@ if __name__ == "__main__":
     model = "rf_reg"
     for updr in ["updrs_1", "updrs_2", "updrs_3", "updrs_4"]:
         for month_diff in [6, 12, 24]:
-            test_df = forecast_updr(testing, model, updr, month_diff)
+            test_df = forecast_updr(first_preds_df, model, updr, month_diff)
 
             final_forecast_df = pd.concat([final_forecast_df, test_df])
 
-    testing = testing.reset_index()
+    first_preds_df = first_preds_df.reset_index()
     final_forecast_df = final_forecast_df.reset_index()
 
     final_forecast_df = final_forecast_df.merge(
-        testing[["visit_id", "index"]], how="left", left_on="index", right_on="index"
+        first_preds_df[["visit_id", "index"]],
+        how="left",
+        left_on="index",
+        right_on="index",
     )
+
+    pred_cols = [
+        "visit_id",
+        "updrs_1",
+        "updrs_2",
+        "updrs_3",
+        "updrs_4",
+    ]
+
+    extra_cols = [col for col in final_forecast_df.columns if "_plus_" in col]
+
+    pred_cols = pred_cols + extra_cols
+
+    final_forecast_df = final_forecast_df[pred_cols]
+
+    submission_df = pd.DataFrame(columns=["prediction_id", "rating"])
+
+    for visit_id in final_forecast_df["visit_id"].unique():
+        visit_df = final_forecast_df[final_forecast_df["visit_id"] == visit_id]
+
+        visit_df = visit_df.rename(
+            columns={
+                "updrs_1": "updrs_1_plus_0_months",
+                "updrs_2": "updrs_2_plus_0_months",
+                "updrs_3": "updrs_3_plus_0_months",
+                "updrs_4": "updrs_4_plus_0_months",
+            }
+        )
+
+        new_visit_df = visit_df.T
+        new_visit_df = visit_df.reset_index()
+
+        new_visit_df = new_visit_df.melt(id_vars="visit_id").dropna().drop_duplicates()
+
+        new_visit_df = new_visit_df[new_visit_df["variable"] != "index"]
+        new_visit_df["variable"] = (
+            new_visit_df["visit_id"] + "_" + new_visit_df["variable"]
+        )
+        new_visit_df = new_visit_df.drop(columns="visit_id")
+        new_visit_df = new_visit_df.rename(
+            columns={"variable": "prediction_id", "value": "rating"}
+        )
+        submission_df = pd.concat([submission_df, new_visit_df])
+
+    submission_df.to_csv(
+        f"~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/submission_{model}_{date}.csv",
+        index=False,
+    )
+
+    print("Done")
