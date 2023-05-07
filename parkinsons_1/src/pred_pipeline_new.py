@@ -172,6 +172,7 @@ if __name__ == "__main__":
 
     final_forecast_df = pd.DataFrame()
 
+    model = "rf_reg"
     for updr in ["updrs_1", "updrs_2", "updrs_3", "updrs_4"]:
         for month_diff in [6, 12, 24]:
             test_df = forecast_updr(testing, model, updr, month_diff)
