@@ -35,10 +35,11 @@ def run(model, target):
     r2 = metrics.r2_score(y_train, preds)
     mape = metrics.mean_absolute_percentage_error(y_train, preds)
     s_mape = smape(y_train, preds)
+    mae = metrics.mean_absolute_error(y_train, preds)
 
-    print(f"SMAPE = {s_mape}, R2 = {r2}, MAPE = {mape}")
+    print(f"SMAPE = {s_mape}, R2 = {r2}, MAPE = {mape}, MAE = {mae}")
 
-    return s_mape, r2, mape
+    return s_mape, r2, mape, mae
 
 
 if __name__ == "__main__":
@@ -57,7 +58,7 @@ if __name__ == "__main__":
         for target in ["updrs_1", "updrs_2", "updrs_3", "updrs_4"]:
             try:
                 print("Running model: ", model_name, "for target: ", target)
-                s, r, m = run(model, target)
+                s, r, m, mae = run(model, target)
                 results.append(
                     {
                         "Model": model_name,
@@ -65,11 +66,12 @@ if __name__ == "__main__":
                         "SMAPE": s,
                         "R2": r,
                         "MAPE": m,
+                        "MAE": mae,
                     }
                 )
-                print("SMAPE: ", s, "R2: ", r, "MAPE: ", m, "\n")
+                print("SMAPE: ", s, "R2: ", r, "MAPE: ", m, "MAE: ", mae, "\n")
                 # store the model
-                model_file = f"../models/model_{model_name}_{target}.pkl"
+                model_file = f"../models/model_{model_name}_{target}_05-06-2023.pkl"
                 pickle.dump(model, open(model_file, "wb"))
             except:
                 print("Error running model: ", model_name, "for target: ", target, "\n")

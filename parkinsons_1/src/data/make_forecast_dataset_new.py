@@ -78,6 +78,9 @@ if __name__ == "__main__":
 
     final_forecast_df = pd.DataFrame()
 
+    updr = "updrs_2"
+    patient_id = 55
+
     for updr in ["updrs_1", "updrs_2", "updrs_3", "updrs_4"]:
         # get only the data for updr, visit_id, visit_month, patient_id
         train_clin_df = train_clin_full_df[
@@ -100,6 +103,9 @@ if __name__ == "__main__":
         for patient_id in forecast_df["patient_id"].unique():
             temp_df = calculate_updrs_diff(forecast_df, patient_id, updr)
             final_forecast_df = pd.concat([final_forecast_df, temp_df])
+
+        # drop the kfold column
+        final_forecast_df = final_forecast_df.drop(columns=["kfold"])
 
         # save the final results
         final_forecast_df.to_csv(
