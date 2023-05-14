@@ -235,7 +235,7 @@ if __name__ == "__main__":
         submission_df = pd.concat([submission_df, new_visit_df])
 
     submission_df.to_csv(
-        f"~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/submission_{model}_{date}.csv",
+        f"~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/submission_{model}_{date}.csv",
         index=False,
     )
 

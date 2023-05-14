@@ -21,6 +21,10 @@ def smape(y_true, y_pred):
     )
 
 
+updr = "updrs_1"
+model = RandomForestRegressor(random_state=42)
+
+
 def run(model, updr):
     # read the training data with folds
     df = pd.read_csv(

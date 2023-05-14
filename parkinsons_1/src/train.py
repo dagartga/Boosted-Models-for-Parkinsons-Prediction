@@ -24,12 +24,6 @@ def smape(y_true, y_pred):
     )
 
 
-target = "updrs_1"
-df = pd.read_csv(
-    f"~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/raw/train_clinical_data.csv"
-)
-
-
 def run(fold, model, target):
     # read the training data with folds
     df = pd.read_csv(
