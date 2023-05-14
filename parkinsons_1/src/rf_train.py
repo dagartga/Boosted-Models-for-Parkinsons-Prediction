@@ -43,11 +43,13 @@ def run(model, target):
 
 
 if __name__ == "__main__":
+    date = dt.datetime.now().strftime("%Y-%m-%d")
+
     models = [
         (
             "rf_reg",
             RandomForestRegressor(
-                n_estimators=200, min_samples_split=25, max_features=25, random_state=42
+                random_state=42,
             ),
         )
     ]
@@ -71,12 +73,12 @@ if __name__ == "__main__":
                 )
                 print("SMAPE: ", s, "R2: ", r, "MAPE: ", m, "MAE: ", mae, "\n")
                 # store the model
-                model_file = f"../models/model_{model_name}_{target}_05-06-2023.pkl"
-                pickle.dump(model, open(model_file, "wb"))
+                # model_file = f"../models/model_{model_name}_{target}_{date}.pkl"
+                # pickle.dump(model, open(model_file, "wb"))
             except:
                 print("Error running model: ", model_name, "for target: ", target, "\n")
 
     results_df = pd.DataFrame(results).set_index("Model")
     results_df.to_csv(
-        "~/parkinsons_proj_1/parkinsons_project/parkinsons_1/models/model_results/rfreg_visit0_results.csv"
+        "~/parkinsons_proj_1/parkinsons_project/parkinsons_1/models/model_results/rfreg_visit0_default_results.csv"
     )
