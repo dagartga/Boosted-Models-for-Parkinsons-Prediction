@@ -22,6 +22,27 @@ def make_categorical_dataset():
     updrs3_df = pd.read_csv("../../data/processed/train_updrs_3.csv")
     updrs4_df = pd.read_csv("../../data/processed/train_updrs_4.csv")
 
+    # list of columns for information
+    info_cols = [
+        "visit_id",
+        "patient_id",
+        "visit_month",
+        "updrs_1",
+        "updrs_2",
+        "updrs_3",
+        "updrs_4",
+        "kfold",
+    ]
+
+    # protein and peptide columns
+    protein_cols = [col for col in updrs1_df.columns if col not in info_cols]
+
+    # add a column for the number of proteins and peptides present
+    updrs1_df["num_proteins"] = updrs1_df[protein_cols].sum(axis=1)
+    updrs2_df["num_proteins"] = updrs2_df[protein_cols].sum(axis=1)
+    updrs3_df["num_proteins"] = updrs3_df[protein_cols].sum(axis=1)
+    updrs4_df["num_proteins"] = updrs4_df[protein_cols].sum(axis=1)
+
     # apply the categorical ratings
     updrs1_df["updrs_1_cat"] = np.where(
         updrs1_df["updrs_1"] <= 10,
