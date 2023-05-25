@@ -22,6 +22,11 @@ def make_categorical_dataset():
     updrs3_df = pd.read_csv("../../data/processed/train_updrs_3.csv")
     updrs4_df = pd.read_csv("../../data/processed/train_updrs_4.csv")
 
+    proteins = pd.read_csv("../../data/raw/train_proteins.csv")
+    peptides = pd.read_csv("../../data/raw/train_peptides.csv")
+
+    protein_list = list(proteins["UniProt"].unique())
+
     # list of columns for information
     info_cols = [
         "visit_id",
@@ -35,13 +40,28 @@ def make_categorical_dataset():
     ]
 
     # protein and peptide columns
-    protein_cols = [col for col in updrs1_df.columns if col not in info_cols]
+    peptide_list = [
+        col
+        for col in updrs1_df.columns
+        if col not in protein_list and col not in info_cols
+    ]
+    prot_pep_cols = protein_list + peptide_list
 
     # add a column for the number of proteins and peptides present
-    updrs1_df["num_proteins"] = updrs1_df[protein_cols].sum(axis=1)
-    updrs2_df["num_proteins"] = updrs2_df[protein_cols].sum(axis=1)
-    updrs3_df["num_proteins"] = updrs3_df[protein_cols].sum(axis=1)
-    updrs4_df["num_proteins"] = updrs4_df[protein_cols].sum(axis=1)
+    updrs1_df["num_prot_pep"] = updrs1_df[prot_pep_cols].sum(axis=1)
+    updrs2_df["num_prot_pep"] = updrs2_df[prot_pep_cols].sum(axis=1)
+    updrs3_df["num_prot_pep"] = updrs3_df[prot_pep_cols].sum(axis=1)
+    updrs4_df["num_prot_pep"] = updrs4_df[prot_pep_cols].sum(axis=1)
+    # number of proteins
+    updrs1_df["num_prot"] = updrs1_df[protein_list].sum(axis=1)
+    updrs2_df["num_prot"] = updrs2_df[protein_list].sum(axis=1)
+    updrs3_df["num_prot"] = updrs3_df[protein_list].sum(axis=1)
+    updrs4_df["num_prot"] = updrs4_df[protein_list].sum(axis=1)
+    # number of peptides
+    updrs1_df["num_pept"] = updrs1_df[peptide_list].sum(axis=1)
+    updrs2_df["num_pept"] = updrs2_df[peptide_list].sum(axis=1)
+    updrs3_df["num_pept"] = updrs3_df[peptide_list].sum(axis=1)
+    updrs4_df["num_pept"] = updrs4_df[peptide_list].sum(axis=1)
 
     # apply the categorical ratings
     updrs1_df["updrs_1_cat"] = np.where(
