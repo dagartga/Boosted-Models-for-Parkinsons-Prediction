@@ -6,6 +6,7 @@ from lightgbm import LGBMRegressor
 from functools import partial
 from sklearn.metrics import mean_squared_error
 from sklearn import model_selection
+import pickle
 
 from hyperopt import hp, fmin, tpe, Trials
 from hyperopt.pyll.base import scope
@@ -67,50 +68,71 @@ def optmize(params, param_names, x, y):
 
 if __name__ == "__main__":
     # read the training data
-    df = pd.read_csv(
+    updrs1_df = pd.read_csv(
         "~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_updrs_1.csv"
     )
 
-    X = df.drop(columns=["visit_id", "patient_id", "updrs_1", "kfold"])
-    y = df["updrs_1"]
-
-    # define the parameter space
-    param_space = [
-        scope.int(hp.quniform("max_depth", 3, 20, 1)),
-        scope.int(hp.quniform("min_child_weight", 1, 7, 1)),
-        scope.float(hp.uniform("reg_alpha", 0.1, 1)),
-        scope.float(hp.uniform("reg_lambda", 0.01, 1)),
-        scope.float(hp.uniform("min_split_gain", 0.05, 1)),
-        scope.float(hp.uniform("colsample_bytree", 0.6, 1)),
-        scope.float(hp.uniform("subsample", 0.6, 1)),
-        scope.float(hp.uniform("learning_rate", 0.01, 0.1)),
-    ]
-
-    # give the param names
-    param_names = [
-        "max_depth",
-        "min_child_weight",
-        "reg_alpha",
-        "reg_lambda",
-        "min_split_gain",
-        "colsample_bytree",
-        "subsample",
-        "learning_rate",
-    ]
-
-    # partial function
-    optimization_function = partial(optmize, param_names=param_names, x=X, y=y)
-
-    # initialize trials to keep logging information
-    trials = Trials()
-
-    # run hyperopt
-    hopt = fmin(
-        fn=optimization_function,
-        space=param_space,
-        algo=tpe.suggest,
-        max_evals=15,
-        trials=trials,
+    updrs2_df = pd.read_csv(
+        "~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_updrs_2.csv"
     )
 
-    print(hopt)
+    updrs3_df = pd.read_csv(
+        "~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_updrs_3.csv"
+    )
+
+    for updrs, df in zip(
+        ["updrs_1", "updrs_2", "updrs_3"], [updrs1_df, updrs2_df, updrs3_df]
+    ):
+        X = df.drop(columns=["visit_id", "patient_id", updrs, "kfold"])
+        y = df[updrs]
+
+        # define the parameter space
+        param_space = [
+            scope.int(hp.quniform("max_depth", 3, 20, 1)),
+            scope.int(hp.quniform("min_child_weight", 1, 7, 1)),
+            scope.float(hp.uniform("reg_alpha", 0.1, 1)),
+            scope.float(hp.uniform("reg_lambda", 0.01, 1)),
+            scope.float(hp.uniform("min_split_gain", 0.05, 1)),
+            scope.float(hp.uniform("colsample_bytree", 0.6, 1)),
+            scope.float(hp.uniform("subsample", 0.6, 1)),
+            scope.float(hp.uniform("learning_rate", 0.01, 0.1)),
+        ]
+
+        # give the param names
+        param_names = [
+            "max_depth",
+            "min_child_weight",
+            "reg_alpha",
+            "reg_lambda",
+            "min_split_gain",
+            "colsample_bytree",
+            "subsample",
+            "learning_rate",
+        ]
+
+        # partial function
+        optimization_function = partial(optmize, param_names=param_names, x=X, y=y)
+
+        # initialize trials to keep logging information
+        trials = Trials()
+
+        # run hyperopt
+        hopt = fmin(
+            fn=optimization_function,
+            space=param_space,
+            algo=tpe.suggest,
+            max_evals=15,
+            trials=trials,
+        )
+
+        print("updrs: ", updrs, "hopt:")
+        print(hopt, "\n")
+
+        # save the best params to a csv file
+        best_params = pd.DataFrame(columns=["updrs", "params"])
+        best_params["updrs"] = [updrs]
+        best_params["params"] = [hopt]
+        best_params.to_csv(
+            f"~/parkinsons_proj_1/parkinsons_project/parkinsons_1/models/lightgbm_best_params_{updrs}.csv",
+            index=False,
+        )
