@@ -128,11 +128,15 @@ if __name__ == "__main__":
         print("updrs: ", updrs, "hopt:")
         print(hopt, "\n")
 
+        # format max_depth and min_child_weight to int
+        hopt["max_depth"] = int(hopt["max_depth"])
+        hopt["min_child_weight"] = int(hopt["min_child_weight"])
+
         # save the best params to a csv file
         best_params = pd.DataFrame(columns=["updrs", "params"])
         best_params["updrs"] = [updrs]
         best_params["params"] = [hopt]
         best_params.to_csv(
-            f"~/parkinsons_proj_1/parkinsons_project/parkinsons_1/models/xgboost_best_params_{updrs}.csv",
+            f"~/parkinsons_proj_1/parkinsons_project/parkinsons_1/models/model_results/xgboost_best_params_{updrs}.csv",
             index=False,
         )
