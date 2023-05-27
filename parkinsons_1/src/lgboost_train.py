@@ -2,7 +2,7 @@
 
 import numpy as np
 import pandas as pd
-import xgboost as xgb
+from lightgbm import LGBMRegressor
 from functools import partial
 from sklearn.metrics import mean_squared_error
 from sklearn import model_selection
@@ -32,7 +32,7 @@ def optmize(params, param_names, x, y):
     params = dict(zip(param_names, params))
 
     # initialize model with current parameters
-    model = xgb.XGBRegressor(**params)
+    model = LGBMRegressor(**params)
 
     # initialize stratified k-fold
     kf = model_selection.StratifiedKFold(n_splits=4)
@@ -78,24 +78,24 @@ if __name__ == "__main__":
     param_space = [
         scope.int(hp.quniform("max_depth", 3, 20, 1)),
         scope.int(hp.quniform("min_child_weight", 1, 7, 1)),
-        scope.float(hp.uniform("alpha", 0.1, 1)),
-        scope.float(hp.uniform("lambda", 0.01, 1)),
-        scope.float(hp.uniform("gamma", 0.05, 1)),
+        scope.float(hp.uniform("reg_alpha", 0.1, 1)),
+        scope.float(hp.uniform("reg_lambda", 0.01, 1)),
+        scope.float(hp.uniform("min_split_gain", 0.05, 1)),
         scope.float(hp.uniform("colsample_bytree", 0.6, 1)),
         scope.float(hp.uniform("subsample", 0.6, 1)),
-        scope.float(hp.uniform("eta", 0.01, 0.1)),
+        scope.float(hp.uniform("learning_rate", 0.01, 0.1)),
     ]
 
     # give the param names
     param_names = [
         "max_depth",
         "min_child_weight",
-        "alpha",
-        "lambda",
-        "gamma",
+        "reg_alpha",
+        "reg_lambda",
+        "min_split_gain",
         "colsample_bytree",
         "subsample",
-        "eta",
+        "learning_rate",
     ]
 
     # partial function
