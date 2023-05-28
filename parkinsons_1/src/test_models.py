@@ -86,7 +86,7 @@ if __name__ == "__main__":
             test_df, rmse, mae, r2 = test_models(df, model, updrs)
 
             # save the model
-            pickle.dump(model, open(f"models/{updrs}_model.pkl", "wb"))
+            pickle.dump(model, open(f"models/{model_name}_{updrs}_model.pkl", "wb"))
 
             # save the test_df
             test_df.to_csv(f"models/{model_name}_{updrs}_test_df.csv", index=False)
@@ -120,7 +120,7 @@ if __name__ == "__main__":
             residuals_df = pd.DataFrame(
                 {
                     "patient_id": test_df["patient_id"],
-                    "visit_id": test_df["visit_id"],
+                    "visit_month": test_df["visit_month"],
                     "residuals": test_df[updrs] - test_df["preds"],
                 }
             )
