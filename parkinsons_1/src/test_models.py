@@ -89,7 +89,10 @@ if __name__ == "__main__":
             pickle.dump(model, open(f"models/{model_name}_{updrs}_model.pkl", "wb"))
 
             # save the test_df
-            test_df.to_csv(f"models/{model_name}_{updrs}_test_df.csv", index=False)
+            test_df.to_csv(
+                f"../models/model_results/{model_name}_{updrs}_test_df.csv",
+                index=False,
+            )
 
             # save the error metrics
             error_metrics = pd.DataFrame(
@@ -100,7 +103,8 @@ if __name__ == "__main__":
                 }
             )
             error_metrics.to_csv(
-                f"models/{model_name}_{updrs}_error_metrics.csv", index=False
+                f"../models/model_results/{model_name}_{updrs}_error_metrics.csv",
+                index=False,
             )
 
             # save the feature importances
@@ -113,7 +117,8 @@ if __name__ == "__main__":
                 }
             )
             feature_importances.to_csv(
-                f"models/{model_name}_{updrs}_feature_importances.csv", index=False
+                f"../models/model_results/{model_name}_{updrs}_feature_importances.csv",
+                index=False,
             )
 
             # save the residuals
@@ -125,5 +130,6 @@ if __name__ == "__main__":
                 }
             )
             residuals_df.to_csv(
-                f"models/{model_name}_{updrs}_residuals.csv", index=False
+                f"../models/model_results/{model_name}_{updrs}_residuals.csv",
+                index=False,
             )
