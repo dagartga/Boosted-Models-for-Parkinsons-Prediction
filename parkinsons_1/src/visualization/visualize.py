@@ -22,5 +22,6 @@ def plot_residuals(target):
 
 
 if __name__ == "__main__":
-    plot_residuals("updrs_3")
-    print("Done!")
+    for target in ["updrs_1", "updrs_2", "updrs_3"]:
+        plot_residuals(target)
+        print(f"{target} Done!")
