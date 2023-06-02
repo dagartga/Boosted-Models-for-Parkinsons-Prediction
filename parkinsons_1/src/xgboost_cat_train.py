@@ -106,5 +106,5 @@ if __name__ == "__main__":
 
     # save as a csv file
     updrs_results_df.to_csv(
-        "../data/processed/xgboost_cat_hyperparam_results.csv", index=False
+        "../data/processed/xgboost_cat_hyperparam_results.csv", index=True
     )
