@@ -52,7 +52,9 @@ if __name__ == "__main__":
 
     updrs_results = dict()
 
-    for updrs, df in zip(["updrs_1"], [updrs1_df]):
+    for updrs, df in zip(
+        ["updrs_1", "updrs_2", "updrs_3"], [updrs1_df, updrs2_df, updrs3_df]
+    ):
         # convert the categorical updrs scores to numerical
         df[f"{updrs}_cat"] = df[f"{updrs}_cat"].map(
             {"mild": 0, "moderate": 1, "severe": 2}
