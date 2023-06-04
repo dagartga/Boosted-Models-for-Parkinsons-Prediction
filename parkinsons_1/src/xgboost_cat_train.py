@@ -22,7 +22,7 @@ def hyperparameter_tuning(
     X_test: pd.DataFrame,
     y_test: pd.Series,
     early_stopping_rounds: int = 50,
-    metric: callable = accuracy_score,
+    metric: callable = roc_auc_score,
 ) -> Dict[str, Any]:
     init_vals = ["max_depth", "reg_alpha"]
     space = {k: (int(val) if k in init_vals else val) for k, val in space.items()}
@@ -56,8 +56,9 @@ if __name__ == "__main__":
         ["updrs_1", "updrs_2", "updrs_3"], [updrs1_df, updrs2_df, updrs3_df]
     ):
         # convert the categorical updrs scores to numerical
+        # combine moderate and severe into one category since low number of samples for severe
         df[f"{updrs}_cat"] = df[f"{updrs}_cat"].map(
-            {"mild": 0, "moderate": 1, "severe": 2}
+            {"mild": 0, "moderate": 1, "severe": 1}
         )
 
         train = df[df["kfold"] != 4].reset_index(drop=True)

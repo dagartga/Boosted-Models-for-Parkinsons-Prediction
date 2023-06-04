@@ -22,7 +22,7 @@ def hyperparameter_tuning(
     X_test: pd.DataFrame,
     y_test: pd.Series,
     early_stopping_rounds: int = 50,
-    metric: callable = accuracy_score,
+    metric: callable = roc_auc_score,
 ) -> Dict[str, Any]:
     init_vals = ["max_depth", "reg_alpha"]
     space = {k: (int(val) if k in init_vals else val) for k, val in space.items()}
