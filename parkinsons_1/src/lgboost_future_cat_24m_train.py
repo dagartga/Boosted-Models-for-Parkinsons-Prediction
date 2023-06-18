@@ -112,6 +112,7 @@ if __name__ == "__main__":
         y_test = label_encoder.fit_transform(y_test)
 
         options = {
+            "n_estimators": scope.int(hp.quniform("n_estimators", 100, 1000, 50)),
             "max_depth": hp.quniform("max_depth", 1, 8, 1),
             "min_child_weight": hp.loguniform("min_child_weight", -2, 3),
             "subsample": hp.uniform("subsample", 0.5, 1),
@@ -120,6 +121,11 @@ if __name__ == "__main__":
             "reg_lambda": hp.uniform("reg_lambda", 1, 10),
             "min_split_gain": hp.loguniform("min_split_gain", -10, 10),
             "learning_rate": hp.loguniform("learning_rate", -7, 0),
+            "is_unbalance": hp.choice("is_unbalance", [True, False]),
+            "feature_fraction": hp.uniform("feature_fraction", 0.4, 1.0),
+            "tree_learner": hp.choice(
+                "tree_learner", ["serial", "feature", "data", "voting"]
+            ),
             "random_state": 42,
         }
 

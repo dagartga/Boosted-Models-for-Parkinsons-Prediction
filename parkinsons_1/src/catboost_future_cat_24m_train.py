@@ -5,7 +5,7 @@ import pandas as pd
 import pickle
 from functools import partial
 from sklearn.metrics import classification_report, roc_auc_score, accuracy_score
-from xgboost import XGBClassifier
+from catboost import CatBoostClassifier
 from sklearn.preprocessing import LabelEncoder
 
 from sklearn import model_selection
@@ -27,16 +27,9 @@ def hyperparameter_tuning(
     init_vals = ["max_depth", "reg_alpha"]
     space = {k: (int(val) if k in init_vals else val) for k, val in space.items()}
     space["early_stopping_rounds"] = early_stopping_rounds
-    model = XGBClassifier(**space)
+    model = CatBoostClassifier(**space)
     evaluation = [(X_train, y_train), (X_test, y_test)]
-    model.fit(
-        X_train,
-        y_train,
-        early_stopping_rounds=20,
-        eval_metric="auc",
-        eval_set=evaluation,
-        verbose=False,
-    )
+    model.fit(X_train, y_train, eval_set=evaluation, verbose=False)
 
     pred = model.predict(X_test)
     score = metric(y_test, pred)
@@ -99,16 +92,16 @@ if __name__ == "__main__":
 
         X_train = train.drop(
             columns=[
-                "kfold",
                 "patient_id",
+                "kfold",
                 f"{updrs}_max",
             ]
         )
         y_train = train[f"{updrs}_max"]
         X_test = test.drop(
             columns=[
-                "kfold",
                 "patient_id",
+                "kfold",
                 f"{updrs}_max",
             ]
         )
@@ -119,17 +112,15 @@ if __name__ == "__main__":
         y_test = label_encoder.fit_transform(y_test)
 
         options = {
-            "n_estimators": scope.int(hp.quniform("n_estimators", 100, 1000, 50)),
-            "max_depth": hp.quniform("max_depth", 1, 8, 1),
-            "min_child_weight": hp.loguniform("min_child_weight", -2, 3),
-            "subsample": hp.uniform("subsample", 0.3, 1),
-            "colsample_bytree": hp.uniform("colsample_bytree", 0.3, 1),
-            "reg_alpha": hp.uniform("reg_alpha", 0, 10),
-            "reg_lambda": hp.uniform("reg_lambda", 1, 10),
-            "gamma": hp.loguniform("gamma", -10, 10),
-            "learning_rate": hp.loguniform("learning_rate", -7, 0),
-            "max_delta_step": hp.quniform("max_delta_step", 1, 10, 1),
-            "scale_pos_weight": hp.uniform("scale_pos_weight", 1, 2.4),
+            "n_estimators": scope.int(hp.quniform("n_estimators", 100, 500, 1)),
+            # "max_depth": hp.quniform("max_depth", 1, 8, 1),
+            # "min_child_weight": hp.loguniform("min_child_weight", -2, 3),
+            # "subsample": hp.uniform("subsample", 0.5, 1),
+            # "colsample_bytree": hp.uniform("colsample_bytree", 0.5, 1),
+            # "reg_alpha": hp.uniform("reg_alpha", 0, 10),
+            # "reg_lambda": hp.uniform("reg_lambda", 1, 10),
+            # "min_split_gain": hp.loguniform("min_split_gain", -10, 10),
+            # "learning_rate": hp.loguniform("learning_rate", -7, 0),
             "random_state": 42,
         }
 
@@ -151,5 +142,5 @@ if __name__ == "__main__":
 
     # save as a csv file
     updrs_results_df.to_csv(
-        "../data/processed/xgboost_future_cat_24m_hyperparam_results.csv", index=True
+        "../data/processed/catboost_future_cat_24m_hyperparam_results.csv", index=True
     )

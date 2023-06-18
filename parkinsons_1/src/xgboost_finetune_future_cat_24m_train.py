@@ -121,34 +121,27 @@ if __name__ == "__main__":
     updrs3_df = df.drop(columns=["updrs_1_max", "updrs_2_max"])
 
     # params to test
-    # bagging_freq = [1, 3, 5, 7, 9] # needs bagging_fraction also
-    tree_learner = ["serial", "feature", "data", "voting"]
-    boosting = ["gbdt", "dart"]
-    feature_fraction = [0.4, 0.6, 0.8, 1.0]
-    is_unbalance = [True, False]
-    min_data_in_leaf = [10, 20, 30, 40, 50]
-    max_depth = [1, 5, 10, 15, 20]
-    val_list = (
-        tree_learner
-        + boosting
-        + feature_fraction
-        + is_unbalance
-        + min_data_in_leaf
-        + max_depth
-    )
+    max_delta_step = [1, 3, 5, 7, 9]
+    scale_pos_weight = [1.1, 1.3, 1.7, 2, 2.3]
+    subsample = [0.3, 0.5, 0.7, 0.9]
+    colsample_bytree = [0.3, 0.5, 0.7, 0.9]
+
+    val_list = max_delta_step + scale_pos_weight + subsample + colsample_bytree
+
     param_names = (
-        ["tree_learner"] * len(tree_learner)
-        + ["boosting"] * len(boosting)
-        + ["feature_fraction"] * len(feature_fraction)
-        + ["is_unbalance"] * len(is_unbalance)
-        + ["min_data_in_leaf"] * len(min_data_in_leaf)
-        + ["max_depth"] * len(max_depth)
+        ["max_delta_step"] * len(max_delta_step)
+        + ["scale_pos_weight"] * len(scale_pos_weight)
+        + ["subsample"] * len(subsample)
+        + ["colsample_bytree"] * len(colsample_bytree)
     )
 
-    updrs_results = dict()
+    test_params_df = pd.DataFrame(
+        columns=["updrs", "param", "val", "auc", "acc", "prec", "recall"]
+    )
+    final_df = pd.DataFrame(columns=["param", "val", "auc", "acc", "prec", "recall"])
 
-    test_params_dict = dict()
-    final_df = pd.DataFrame()
+    updrs = "updrs_1"
+    df = updrs1_df
 
     for updrs, df in zip(
         ["updrs_1", "updrs_2", "updrs_3"], [updrs1_df, updrs2_df, updrs3_df]
@@ -185,23 +178,23 @@ if __name__ == "__main__":
             index_col=0,
         )
 
+        i = 0
         for param, val in zip(param_names, val_list):
             # prepare the model
             test_param = [param, val]
             model = prepare_xgboost_model(xgb_hyperparams_df, updrs, test_param)
             auc, acc, prec, recall = cross_fold_validation(df, model, updrs)
 
-            param_val = f"{param}_{val}"
-            test_params_dict[param_val] = {
-                "AUC": auc,
-                "Accuracy": acc,
-                "Precision": prec,
-                "Recall": recall,
-            }
+            test_params_df.loc[i, "updrs"] = updrs
+            test_params_df.loc[i, "param"] = param
+            test_params_df.loc[i, "val"] = val
+            test_params_df.loc[i, "auc"] = auc
+            test_params_df.loc[i, "acc"] = acc
+            test_params_df.loc[i, "prec"] = prec
+            test_params_df.loc[i, "recall"] = recall
+            i += 1
 
         # save the results
-        final_results = pd.DataFrame(test_params_dict)
-        test_params_dict = dict()
-        final_results.to_csv(
+        test_params_df.to_csv(
             f"./models/xgboost_24m_hyperparam_finetune_results_{updrs}.csv", index=True
         )
