@@ -27,6 +27,7 @@ def hyperparameter_tuning(
     init_vals = ["max_depth", "reg_alpha"]
     space = {k: (int(val) if k in init_vals else val) for k, val in space.items()}
     space["early_stopping_rounds"] = early_stopping_rounds
+    space["eval_metric"] = "auc"
     model = XGBClassifier(**space)
     evaluation = [(X_train, y_train), (X_test, y_test)]
     model.fit(X_train, y_train, eval_set=evaluation, verbose=False)
