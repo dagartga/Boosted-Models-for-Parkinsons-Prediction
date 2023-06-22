@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-# lgboost_finetune_future_cat_24m_train.py
-=======
 # xgboost_train.py
->>>>>>> 3ef48175ca4fb4ae349b9654c1bd754caac9b2da
 
 import numpy as np
 import pandas as pd
@@ -152,10 +148,10 @@ if __name__ == "__main__":
         + ["max_depth"] * len(max_depth)
     )
 
-    # create a df to store the results
-    test_params_df = pd.DataFrame(
-        columns=["updrs", "param", "val", "auc", "acc", "prec", "recall"]
-    )
+    updrs_results = dict()
+
+    test_params_dict = dict()
+    final_df = pd.DataFrame()
 
     for updrs, df in zip(
         ["updrs_1", "updrs_2", "updrs_3"], [updrs1_df, updrs2_df, updrs3_df]
@@ -192,24 +188,23 @@ if __name__ == "__main__":
             index_col=0,
         )
 
-        i = 0
-
         for param, val in zip(param_names, val_list):
             # prepare the model
             test_param = [param, val]
             model = prepare_lgboost_model(lgb_hyperparams_df, updrs, test_param)
             auc, acc, prec, recall = cross_fold_validation(df, model, updrs)
 
-            test_params_df.loc[i, "updrs"] = updrs
-            test_params_df.loc[i, "param"] = param
-            test_params_df.loc[i, "val"] = val
-            test_params_df.loc[i, "auc"] = auc
-            test_params_df.loc[i, "acc"] = acc
-            test_params_df.loc[i, "prec"] = prec
-            test_params_df.loc[i, "recall"] = recall
-            i += 1
+            param_val = f"{param}_{val}"
+            test_params_dict[param_val] = {
+                "AUC": auc,
+                "Accuracy": acc,
+                "Precision": prec,
+                "Recall": recall,
+            }
 
         # save the results
-        test_params_df.to_csv(
+        final_results = pd.DataFrame(test_params_dict)
+        test_params_dict = dict()
+        final_results.to_csv(
             f"./models/lgboost_24m_hyperparam_finetune_results_{updrs}.csv", index=True
         )

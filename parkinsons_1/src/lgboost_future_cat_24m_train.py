@@ -15,56 +15,27 @@ from hyperopt import hp, fmin, tpe, Trials, STATUS_OK
 from hyperopt.pyll.base import scope
 
 
-def hyperparameter_tuning(
-    space: Dict[str, Union[float, int]],
-    X_train: pd.DataFrame,
-    y_train: pd.Series,
-    X_test: pd.DataFrame,
-    y_test: pd.Series,
-    early_stopping_rounds: int = 50,
-    metric: callable = roc_auc_score,
-) -> Dict[str, Any]:
-    init_vals = ["max_depth", "reg_alpha"]
-    space = {k: (int(val) if k in init_vals else val) for k, val in space.items()}
-    space["early_stopping_round"] = early_stopping_rounds
-    space["metric"] = "auc"
-    model = LGBMClassifier(**space)
-    evaluation = [(X_train, y_train), (X_test, y_test)]
-    model.fit(X_train, y_train, eval_set=evaluation, verbose=False)
-
-    pred = model.predict(X_test)
-    score = metric(y_test, pred)
-    return {"loss": -score, "status": STATUS_OK, "model": model}
-
-
-def create_kfolds(df, updrs):
-    # create a new column for kfold and fill it with -1
-    df["kfold"] = -1
-
-    # randomize the rows of the data
-    df = df.sample(frac=1).reset_index(drop=True)
-
-    # calculate the number of bins using Sturge's rule
-    # I am using the max here to ensure that the number of bins is at least 5
-    # and at most 12
-    num_bins = int(np.floor(1 + np.log2(len(df))))
-
-    # bin targets
-    df.loc[:, "bins"] = pd.cut(df[f"{updrs}_max"], bins=num_bins, labels=False)
-
-    # initiate the kfold class from model_selection module
+def optimize(params, x, y):
+    """
+    Optimizer function for the hyperparameter tuning
+    """
+    model = LGBMClassifier(**params, n_estimators=500)
     kf = model_selection.StratifiedKFold(n_splits=5)
+    auc = []
+    for idx in kf.split(X=x, y=y):
+        train_idx, test_idx = idx[0], idx[1]
+        xtrain = x[train_idx]
+        ytrain = y[train_idx]
 
-    # fill the new kfold column
-    # note that instead of targets we are using bins!
-    for fold, (train_idx, val_idx) in enumerate(kf.split(X=df, y=df.bins.values)):
-        df.loc[val_idx, "kfold"] = fold
+        xtest = x[test_idx]
+        ytest = y[test_idx]
 
-    # drop the bins column
-    df = df.drop("bins", axis=1)
+        model.fit(xtrain, ytrain)
+        preds = model.predict(xtest)
+        fold_auc = roc_auc_score(ytest, preds)
+        auc.append(fold_auc)
 
-    # return dataframe with folds
-    return df
+    return -1.0 * np.mean(auc)
 
 
 if __name__ == "__main__":
@@ -80,58 +51,54 @@ if __name__ == "__main__":
     updrs2_df = df.drop(columns=["updrs_1_max", "updrs_3_max"])
     updrs3_df = df.drop(columns=["updrs_1_max", "updrs_2_max"])
 
+    df = updrs1_df
+    updrs = "updrs_1"
+
     updrs_results = dict()
 
     for updrs, df in zip(
         ["updrs_1", "updrs_2", "updrs_3"], [updrs1_df, updrs2_df, updrs3_df]
     ):
-        # preprocess the df
-        df = create_kfolds(df, updrs)
-
-        train = df[df["kfold"] != 4].reset_index(drop=True)
-        test = df[df["kfold"] == 4].reset_index(drop=True)
-
-        X_train = train.drop(
+        X = df.drop(
             columns=[
                 "patient_id",
-                "kfold",
                 f"{updrs}_max",
             ]
-        )
-        y_train = train[f"{updrs}_max"]
-        X_test = test.drop(
-            columns=[
-                "patient_id",
-                "kfold",
-                f"{updrs}_max",
-            ]
-        )
-        y_test = test[f"{updrs}_max"]
+        ).values
+        y = df[f"{updrs}_max"].values
+        # encode the target
+        y = LabelEncoder().fit_transform(y)
 
-        label_encoder = LabelEncoder()
-        y_train = label_encoder.fit_transform(y_train)
-        y_test = label_encoder.fit_transform(y_test)
-
-        options = {
-            "max_depth": hp.quniform("max_depth", 1, 8, 1),
-            "min_child_weight": hp.loguniform("min_child_weight", -2, 3),
-            "subsample": hp.uniform("subsample", 0.5, 1),
-            "colsample_bytree": hp.uniform("colsample_bytree", 0.5, 1),
-            "reg_alpha": hp.uniform("reg_alpha", 0, 10),
-            "reg_lambda": hp.uniform("reg_lambda", 1, 10),
-            "min_split_gain": hp.loguniform("min_split_gain", -10, 10),
+        param_space = {
+            "max_depth": scope.int(hp.quniform("max_depth", 1, 20, 1)),
+            "min_data_in_leaf": scope.int(hp.quniform("min_data_in_leaf", 10, 30, 1)),
+            "bagging_freq": scope.int(hp.uniform("bagging_freq", 1, 10)),
+            "bagging_fraction": hp.uniform("bagging_fraction", 0.3, 0.9),
+            "tree_learner": hp.choice(
+                "tree_learner", ["serial", "feature", "data", "voting"]
+            ),
+            "is_unbalance": hp.choice("is_unbalance", [True, False]),
+            "boosting": hp.choice("boosting", ["gbdt", "dart", "rf"]),
+            "lambda_l2": hp.uniform("lambda_l2", 0, 10),
+            "lambda_l1": hp.uniform("lambda_l1", 0, 10),
+            "feature_fraction": hp.uniform("feature_fraction", 0.5, 0.9),
             "learning_rate": hp.loguniform("learning_rate", -7, 0),
+            "max_delta_step": scope.int(hp.quniform("max_delta_step", 1, 10, 1)),
             "random_state": 42,
         }
 
+        # partial function
+        optimization_function = partial(optimize, x=X, y=y)
+
+        # initialize trials to keep logging information
         trials = Trials()
+
+        # run hyperopt
         best = fmin(
-            fn=lambda space: hyperparameter_tuning(
-                space, X_train, y_train, X_test, y_test
-            ),
-            space=options,
+            fn=optimization_function,
+            space=param_space,
             algo=tpe.suggest,
-            max_evals=100,
+            max_evals=50,
             trials=trials,
         )
 
