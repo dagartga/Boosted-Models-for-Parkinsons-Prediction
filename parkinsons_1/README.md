@@ -1,8 +1,10 @@
 parkinsons_prediction
 ==============================
 
-Time series prediction of parkinsons severity based on kaggle data. 
-Use Prophet, SARIMAX, and Random Forrest Classfier as baseline models.
+## Overview
+
+Using the first 12 months of visits where protein mass spectometry data has been recorded, the model is meant to assist doctors in determining whether a patient is likely to develop moderate-to-severe parkinsons UPDRS values.
+
 
 Project Organization
 ------------
