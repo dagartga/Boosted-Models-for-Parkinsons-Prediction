@@ -3,7 +3,7 @@ parkinsons_prediction
 
 ## Overview
 
-Using the first 12 months of visits where protein mass spectometry data has been recorded, the model is meant to assist doctors in determining whether a patient is likely to develop moderate-to-severe parkinsons UPDRS values.
+Using the first 12 months of doctor's visits where protein mass spectometry data has been recorded, the model is meant to assist doctors in determining whether a patient is likely to develop moderate-to-severe parkinsons for each of the four UPDRS. A separate categorical prediction model for UPDRS 1, 2, 3, or 4 is available for use. If a protein or peptide column is not present in the data, then it is given a value of 0, meaning it is not present in the sample. The column for 
 
 
 Project Organization
