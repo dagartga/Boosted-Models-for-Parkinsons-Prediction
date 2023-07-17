@@ -109,19 +109,41 @@ def cross_fold_validation(df, model, target):
 
     return mean_auc, mean_acc, mean_precision, mean_recall
 
+def convert_df_to_1yr(df, updrs):
+    # get the max category for each patient
+    max_df = df.groupby(['patient_id'])[f'{updrs}_cat'].max().reset_index()
+    max_df = max_df.rename(columns={f'{updrs}_cat': f'{updrs}_max_cat'})
+    # merge the max category with the original dataframe
+    updrs_df = df.merge(max_df, on=['patient_id'], how='left')
+    # take only the visit months that are 12 or less
+    updrs_yr_df = updrs_df[updrs_df['visit_month'] <= 12]
+    updrs_yr_df = updrs_yr_df.drop(columns=[f'{updrs}_cat'])
+    updrs_yr_df.rename(columns={f'{updrs}_max_cat': f'{updrs}_cat'}, inplace=True)
+    
+    return updrs_yr_df
+
 
 if __name__ == "__main__":
     # read the training data
-    df = pd.read_csv(
-        "~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_24month_protein_data.csv"
-    )
+    # read the training data
+    # read in the protein and updrs data
+    updrs1_df = pd.read_csv('../data/processed/train_updrs_1_cat.csv')
+    updrs2_df = pd.read_csv('../data/processed/train_updrs_2_cat.csv')
+    updrs3_df = pd.read_csv('../data/processed/train_updrs_3_cat.csv')
 
-    # get only the updrs of interest
-    # the updrs_1_max is the target, which means the highest categorical value
-    # 0 is mild parkinsons, and 1 is moderate to severe parkinsons as the max
-    updrs1_df = df.drop(columns=["updrs_2_max", "updrs_3_max"])
-    updrs2_df = df.drop(columns=["updrs_1_max", "updrs_3_max"])
-    updrs3_df = df.drop(columns=["updrs_1_max", "updrs_2_max"])
+    # replace the categorical updrs scores with numerical for mild, moderate and severe
+    ## combine the moderate and severe categories since there are very few severe observations
+    updrs1_df['updrs_1_cat'] = updrs1_df['updrs_1_cat'].map({'mild': 0, 'moderate': 1, 'severe': 1})
+    updrs2_df['updrs_2_cat'] = updrs2_df['updrs_2_cat'].map({'mild': 0, 'moderate': 1, 'severe': 1})
+    updrs3_df['updrs_3_cat'] = updrs3_df['updrs_3_cat'].map({'mild': 0, 'moderate': 1, 'severe': 1})
+
+    updrs1_df = convert_df_to_1yr(updrs1_df, 'updrs_1')
+    updrs2_df = convert_df_to_1yr(updrs2_df, 'updrs_2')
+    updrs3_df = convert_df_to_1yr(updrs3_df, 'updrs_3')
+
+    updrs1_df = updrs1_df.drop(columns=['kfold'])
+    updrs2_df = updrs2_df.drop(columns=['kfold'])
+    updrs3_df = updrs3_df.drop(columns=['kfold'])
 
     # params to test
     # bagging_freq = [1, 3, 5, 7, 9] # needs bagging_fraction also
@@ -184,7 +206,7 @@ if __name__ == "__main__":
         y_test = label_encoder.fit_transform(y_test)
 
         lgb_hyperparams_df = pd.read_csv(
-            "../data/processed/lgboost_future_cat_24m_hyperparam_results.csv",
+            "../data/processed/lgboost_future_cat_12m_hyperparam_results.csv",
             index_col=0,
         )
 
@@ -206,5 +228,5 @@ if __name__ == "__main__":
         final_results = pd.DataFrame(test_params_dict)
         test_params_dict = dict()
         final_results.to_csv(
-            f"./models/lgboost_24m_hyperparam_finetune_results_{updrs}.csv", index=True
+            f"./models/lgboost_12m_hyperparam_finetune_results_{updrs}.csv", index=True
         )
