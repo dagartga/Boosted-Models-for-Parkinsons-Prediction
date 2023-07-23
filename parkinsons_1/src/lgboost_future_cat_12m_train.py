@@ -1,4 +1,4 @@
-# xgboost_train.py
+# lgboost_future_cat_12m_train.py
 
 import numpy as np
 import pandas as pd
@@ -66,6 +66,7 @@ if __name__ == "__main__":
     updrs2_df['updrs_2_cat'] = updrs2_df['updrs_2_cat'].map({'mild': 0, 'moderate': 1, 'severe': 1})
     updrs3_df['updrs_3_cat'] = updrs3_df['updrs_3_cat'].map({'mild': 0, 'moderate': 1, 'severe': 1})
 
+    # get onlyt the data for visit month 12 or less
     updrs1_df = convert_df_to_1yr(updrs1_df, 'updrs_1')
     updrs2_df = convert_df_to_1yr(updrs2_df, 'updrs_2')
     updrs3_df = convert_df_to_1yr(updrs3_df, 'updrs_3')

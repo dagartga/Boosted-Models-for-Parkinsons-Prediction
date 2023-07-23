@@ -1,8 +1,5 @@
-<<<<<<< HEAD
-# lgboost_finetune_future_cat_24m_train.py
-=======
-# xgboost_train.py
->>>>>>> 3ef48175ca4fb4ae349b9654c1bd754caac9b2da
+# lgboost_finetune_future_cat_12m_train.py
+
 
 import numpy as np
 import pandas as pd
