@@ -24,8 +24,8 @@ def hyperparameter_tuning(
     early_stopping_rounds: int = 50,
     metric: callable = roc_auc_score,
 ) -> Dict[str, Any]:
-    init_vals = ["max_depth", "reg_alpha"]
-    space = {k: (int(val) if k in init_vals else val) for k, val in space.items()}
+    int_vals = ["depth", "bagging_temperature", "min_data_in_leaf"]
+    space = {k: (int(val) if k in int_vals else val) for k, val in space.items()}
     space["early_stopping_rounds"] = early_stopping_rounds
     model = CatBoostClassifier(**space)
     evaluation = [(X_train, y_train), (X_test, y_test)]
@@ -65,53 +65,56 @@ def create_kfolds(df, updrs):
     # return dataframe with folds
     return df
 
+
 def convert_df_to_1yr(df, updrs):
     # get the max category for each patient
-    max_df = df.groupby(['patient_id'])[f'{updrs}_cat'].max().reset_index()
-    max_df = max_df.rename(columns={f'{updrs}_cat': f'{updrs}_max_cat'})
+    max_df = df.groupby(["patient_id"])[f"{updrs}_cat"].max().reset_index()
+    max_df = max_df.rename(columns={f"{updrs}_cat": f"{updrs}_max_cat"})
     # merge the max category with the original dataframe
-    updrs_df = df.merge(max_df, on=['patient_id'], how='left')
+    updrs_df = df.merge(max_df, on=["patient_id"], how="left")
     # take only the visit months that are 12 or less
-    updrs_yr_df = updrs_df[updrs_df['visit_month'] <= 12]
-    updrs_yr_df = updrs_yr_df.drop(columns=[f'{updrs}_cat'])
-    updrs_yr_df.rename(columns={f'{updrs}_max_cat': f'{updrs}_cat'}, inplace=True)
-    
+    updrs_yr_df = updrs_df[updrs_df["visit_month"] <= 12]
+    updrs_yr_df = updrs_yr_df.drop(columns=[f"{updrs}_cat"])
+    updrs_yr_df.rename(columns={f"{updrs}_max_cat": f"{updrs}_cat"}, inplace=True)
+
     return updrs_yr_df
 
 
-
 if __name__ == "__main__":
-    
     # read the training data
     # read in the protein and updrs data
-    updrs1_df = pd.read_csv('../data/processed/train_updrs_1_cat.csv')
-    updrs2_df = pd.read_csv('../data/processed/train_updrs_2_cat.csv')
-    updrs3_df = pd.read_csv('../data/processed/train_updrs_3_cat.csv')
+    updrs1_df = pd.read_csv("../data/processed/train_updrs_1_cat.csv")
+    updrs2_df = pd.read_csv("../data/processed/train_updrs_2_cat.csv")
+    updrs3_df = pd.read_csv("../data/processed/train_updrs_3_cat.csv")
 
     # replace the categorical updrs scores with numerical for mild, moderate and severe
     ## combine the moderate and severe categories since there are very few severe observations
-    updrs1_df['updrs_1_cat'] = updrs1_df['updrs_1_cat'].map({'mild': 0, 'moderate': 1, 'severe': 1})
-    updrs2_df['updrs_2_cat'] = updrs2_df['updrs_2_cat'].map({'mild': 0, 'moderate': 1, 'severe': 1})
-    updrs3_df['updrs_3_cat'] = updrs3_df['updrs_3_cat'].map({'mild': 0, 'moderate': 1, 'severe': 1})
+    updrs1_df["updrs_1_cat"] = updrs1_df["updrs_1_cat"].map(
+        {"mild": 0, "moderate": 1, "severe": 1}
+    )
+    updrs2_df["updrs_2_cat"] = updrs2_df["updrs_2_cat"].map(
+        {"mild": 0, "moderate": 1, "severe": 1}
+    )
+    updrs3_df["updrs_3_cat"] = updrs3_df["updrs_3_cat"].map(
+        {"mild": 0, "moderate": 1, "severe": 1}
+    )
 
-    updrs1_df = convert_df_to_1yr(updrs1_df, 'updrs_1')
-    updrs2_df = convert_df_to_1yr(updrs2_df, 'updrs_2')
-    updrs3_df = convert_df_to_1yr(updrs3_df, 'updrs_3')
+    updrs1_df = convert_df_to_1yr(updrs1_df, "updrs_1")
+    updrs2_df = convert_df_to_1yr(updrs2_df, "updrs_2")
+    updrs3_df = convert_df_to_1yr(updrs3_df, "updrs_3")
 
     try:
-        updrs1_df = updrs1_df.drop(columns=['updrs_1'])
-        updrs2_df = updrs2_df.drop(columns=['updrs_2'])
-        updrs3_df = updrs3_df.drop(columns=['updrs_3'])
+        updrs1_df = updrs1_df.drop(columns=["updrs_1"])
+        updrs2_df = updrs2_df.drop(columns=["updrs_2"])
+        updrs3_df = updrs3_df.drop(columns=["updrs_3"])
     except:
-        print('UPDRS values not in Dataframe')
+        print("UPDRS values not in Dataframe")
 
     updrs_results = dict()
 
     for updrs, df in zip(
         ["updrs_1", "updrs_2", "updrs_3"], [updrs1_df, updrs2_df, updrs3_df]
     ):
-    
-
         train = df[df["kfold"] != 4].reset_index(drop=True)
         test = df[df["kfold"] == 4].reset_index(drop=True)
 
