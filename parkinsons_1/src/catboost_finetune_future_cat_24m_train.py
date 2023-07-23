@@ -5,7 +5,7 @@ import pandas as pd
 import pickle
 from functools import partial
 from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score
-from lightgbm import LGBMClassifier
+from catboost import CatBoostClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn import model_selection
 
@@ -51,14 +51,14 @@ def create_kfolds(df, updrs):
     return df
 
 
-def prepare_lgboost_model(lgb_hyperparams_df, target, test_param):
+def prepare_catboost_model(cb_hyperparams_df, target, test_param):
     # train the model using the hyperparameters from the hyperparameter tuning
-    updrs_hp = lgb_hyperparams_df[target].to_dict()
+    updrs_hp = cb_hyperparams_df[target].to_dict()
     test_param_key = test_param[0]
     test_param_value = test_param[1]
     updrs_hp[test_param_key] = test_param_value
     updrs_hp["max_depth"] = int(updrs_hp["max_depth"])
-    model = LGBMClassifier(**updrs_hp)
+    model = CatBoostClassifier(**updrs_hp)
     return model
 
 
@@ -207,15 +207,15 @@ if __name__ == "__main__":
         y_train = label_encoder.fit_transform(y_train)
         y_test = label_encoder.fit_transform(y_test)
 
-        lgb_hyperparams_df = pd.read_csv(
-            "../data/processed/lgboost_future_cat_12m_hyperparam_results.csv",
+        cb_hyperparams_df = pd.read_csv(
+            "../data/processed/catboost_future_cat_12m_hyperparam_results.csv",
             index_col=0,
         )
 
         for param, val in zip(param_names, val_list):
             # prepare the model
             test_param = [param, val]
-            model = prepare_lgboost_model(lgb_hyperparams_df, updrs, test_param)
+            model = prepare_catboost_model(cb_hyperparams_df, updrs, test_param)
             auc, acc, prec, recall = cross_fold_validation(df, model, updrs)
 
             param_val = f"{param}_{val}"
@@ -230,5 +230,5 @@ if __name__ == "__main__":
         final_results = pd.DataFrame(test_params_dict)
         test_params_dict = dict()
         final_results.to_csv(
-            f"./models/lgboost_12m_hyperparam_finetune_results_{updrs}.csv", index=True
+            f"./models/catboost_12m_hyperparam_finetune_results_{updrs}.csv", index=True
         )
