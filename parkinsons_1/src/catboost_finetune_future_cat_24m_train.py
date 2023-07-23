@@ -124,7 +124,7 @@ def convert_df_to_1yr(df, updrs):
 
 
 if __name__ == "__main__":
-    # read the training data
+    
     # read the training data
     # read in the protein and updrs data
     updrs1_df = pd.read_csv('../data/processed/train_updrs_1_cat.csv')
@@ -137,10 +137,12 @@ if __name__ == "__main__":
     updrs2_df['updrs_2_cat'] = updrs2_df['updrs_2_cat'].map({'mild': 0, 'moderate': 1, 'severe': 1})
     updrs3_df['updrs_3_cat'] = updrs3_df['updrs_3_cat'].map({'mild': 0, 'moderate': 1, 'severe': 1})
 
+    # extract only visits of months 12 or less
     updrs1_df = convert_df_to_1yr(updrs1_df, 'updrs_1')
     updrs2_df = convert_df_to_1yr(updrs2_df, 'updrs_2')
     updrs3_df = convert_df_to_1yr(updrs3_df, 'updrs_3')
 
+    # remove the kfold column from the data
     updrs1_df = updrs1_df.drop(columns=['kfold'])
     updrs2_df = updrs2_df.drop(columns=['kfold'])
     updrs3_df = updrs3_df.drop(columns=['kfold'])
