@@ -1,4 +1,4 @@
-# xgboost_train.py
+# catboost_finetune_future_cat_12m_train.py
 
 import numpy as np
 import pandas as pd
