@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Run xgboost_future_cat_24m_train.py
-python xgboost_future_cat_24m_train.py
+# Run xgboost_future_cat_12m_train.py file
+python xgboost_future_cat_12m_train.py
 
-# Run lgboost_future_cat_24m_train.py
-python lgboost_future_cat_24m_train.py
+# Run lgboost_future_cat_12m_train.py file
+python lgboost_future_cat_12m_train.py
