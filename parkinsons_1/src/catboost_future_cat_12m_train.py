@@ -137,15 +137,12 @@ if __name__ == "__main__":
         y_test = label_encoder.fit_transform(y_test)
 
         options = {
-            "n_estimators": scope.int(hp.quniform("n_estimators", 100, 500, 1)),
-            "max_depth": hp.quniform("max_depth", 1, 8, 1),
-            # "min_child_weight": hp.loguniform("min_child_weight", -2, 3),
-            "subsample": hp.uniform("subsample", 0.5, 1),
-            # "colsample_bytree": hp.uniform("colsample_bytree", 0.5, 1),
-            # "reg_alpha": hp.uniform("reg_alpha", 0, 10),
-            # "reg_lambda": hp.uniform("reg_lambda", 1, 10),
-            # "min_split_gain": hp.loguniform("min_split_gain", -10, 10),
+            "depth": scope.int(hp.quniform("depth", 4, 10, 1)),
             "learning_rate": hp.loguniform("learning_rate", -7, 0),
+            "bagging_temperature": scope.int(hp.uniform("bagging_temperature", 1, 10)),
+            "min_data_in_leaf": scope.int(hp.quniform("min_data_in_leaf", 1, 10, 1)),
+            "l2_leaf_reg": hp.uniform("l2_leaf_reg", 1, 10),
+            # "max_leaves": scope.int(hp.quniform("max_leaves", 1, 30, 1)),
             "random_state": 42,
         }
 
