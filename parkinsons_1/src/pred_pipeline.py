@@ -1,156 +1,170 @@
 import pandas as pd
+import numpy as np
+import xgboost as xgb
+import joblib
 import pickle
-
-import datetime as dt
 import warnings
+from catboost_future_cat_12m_train import convert_df_to_1yr
+from data.make_dataset import preprocess_train_df
 warnings.filterwarnings('ignore')
 
 
 
-def preprocess_test_df(test_clin_df, test_prot_df, test_pep_df, save_data=False):
+def make_categorical_dataset(processed_dfs, proteins_df):
+    """
+    Turns the train_updrs.csv into a categorical dataset
+    based on the ratings:
+    updrs 1 categorical ratings: 10 and below is mild, 11 to 21 is moderate, 22 and above is severe
+    updrs 2 categorical ratings: 12 and below is mild, 13 to 29 is moderate, 30 and above is severe
+    updrs 3 categorical ratings: 32 and below is mild, 33 to 58 is moderate, 59 and above is severe
+    updrs 4 categorical ratings: 4 and below is mild, 5 to 12 is moderate, 13 and above is severe
+    """
+    # read the data
+    updrs1_df = processed_dfs['updrs_1']
+    updrs2_df = processed_dfs['updrs_2']
+    updrs3_df = processed_dfs['updrs_3']
+    updrs4_df = processed_dfs['updrs_4']
+
+
+    protein_list = list(proteins_df["UniProt"].unique())
+
+    # list of columns for information
+    info_cols = [
+        "visit_id",
+        "patient_id",
+        "visit_month",
+        "updrs_1",
+        "updrs_2",
+        "updrs_3",
+        "updrs_4",
+        "kfold",
+    ]
+
+    # protein and peptide columns
+    peptide_list = [
+        col
+        for col in updrs1_df.columns
+        if col not in protein_list and col not in info_cols
+    ]
+    prot_pep_cols = protein_list + peptide_list
+
+    # add a column for the number of proteins and peptides present
+    updrs1_df["num_prot_pep"] = updrs1_df[prot_pep_cols].sum(axis=1)
+    updrs2_df["num_prot_pep"] = updrs2_df[prot_pep_cols].sum(axis=1)
+    updrs3_df["num_prot_pep"] = updrs3_df[prot_pep_cols].sum(axis=1)
+    updrs4_df["num_prot_pep"] = updrs4_df[prot_pep_cols].sum(axis=1)
+    # number of proteins
+    updrs1_df["num_prot"] = updrs1_df[protein_list].sum(axis=1)
+    updrs2_df["num_prot"] = updrs2_df[protein_list].sum(axis=1)
+    updrs3_df["num_prot"] = updrs3_df[protein_list].sum(axis=1)
+    updrs4_df["num_prot"] = updrs4_df[protein_list].sum(axis=1)
+    # number of peptides
+    updrs1_df["num_pept"] = updrs1_df[peptide_list].sum(axis=1)
+    updrs2_df["num_pept"] = updrs2_df[peptide_list].sum(axis=1)
+    updrs3_df["num_pept"] = updrs3_df[peptide_list].sum(axis=1)
+    updrs4_df["num_pept"] = updrs4_df[peptide_list].sum(axis=1)
+
+    # apply the categorical ratings
+    updrs1_df["updrs_1_cat"] = np.where(
+        updrs1_df["updrs_1"] <= 10,
+        "mild",
+        np.where(updrs1_df["updrs_1"] <= 21, "moderate", "severe"),
+    )
+    updrs2_df["updrs_2_cat"] = np.where(
+        updrs2_df["updrs_2"] <= 12,
+        "mild",
+        np.where(updrs2_df["updrs_2"] <= 29, "moderate", "severe"),
+    )
+    updrs3_df["updrs_3_cat"] = np.where(
+        updrs3_df["updrs_3"] <= 32,
+        "mild",
+        np.where(updrs3_df["updrs_3"] <= 58, "moderate", "severe"),
+    )
+    updrs4_df["updrs_4_cat"] = np.where(
+        updrs4_df["updrs_4"] <= 4,
+        "mild",
+        np.where(updrs4_df["updrs_4"] <= 12, "moderate", "severe"),
+    )
+
+    categorical_dfs = {'updrs_1':updrs1_df,
+                       'updrs_2':updrs2_df,
+                       'updrs_3':updrs3_df,
+                       'updrs_4':updrs4_df}
+
+    return categorical_dfs
+
+
+def add_med_data(clin_df, updrs_df):
     
-    if 'upd23b_clinical_state_on_medication' in test_clin_df.columns:
-        # drop the medication column
-        test_clin_df = test_clin_df.drop(columns=['upd23b_clinical_state_on_medication'])
-    
-    # create a column with the UniProt and Peptide name combined
-    test_pep_df['peptide_uniprot'] = test_pep_df['Peptide'] + '_'+ test_pep_df['UniProt']
+    clin_df['upd23b_clinical_state_on_medication'] = clin_df['upd23b_clinical_state_on_medication'].fillna('Unknown')
 
-    # create a table with the visit_id as the index and the proteins or peptides as the feature and the abundance as the values
-    test_prot_pivot = test_prot_df.pivot(index='visit_id', values='NPX', columns='UniProt')
-    test_pep_pivot = test_pep_df.pivot(index='visit_id', values='PeptideAbundance', columns='peptide_uniprot')
+    # get dummies for on_medication column
+    clin_df_dummies = pd.get_dummies(clin_df, columns=['upd23b_clinical_state_on_medication'], drop_first=True)
 
-    # combine the two tables on the visit_id
-    full_prot_test_df = test_prot_pivot.join(test_pep_pivot)
+    clin_df_dummies = clin_df_dummies[['visit_id', 'upd23b_clinical_state_on_medication_On', 'upd23b_clinical_state_on_medication_Unknown']]
 
-    # fill nan with 0 
-    full_prot_test_df = full_prot_test_df.fillna(0)
+    # merge the updrs data with the clinical data for dummy columns
+    updrs_df = pd.merge(updrs_df, clin_df_dummies, on='visit_id')
 
-    full_test_df = test_clin_df.merge(full_prot_test_df, how='inner', left_on='visit_id', right_on='visit_id')
-    full_test_df = full_test_df.sample(frac=1).reset_index(drop=True)
-
-    
-    return full_test_df
+    return updrs_df
 
 
 
-def prepare_model_df(model_df, target, visit_month=0):
-    
-    train_df = pd.read_csv(f'~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_{target}.csv')
-    pred_cols = [col for col in train_df.columns if col not in ['visit_id', 'patient_id', target, 'kfold']]
+def predict_updrs1(df):
 
-    # add visit_month if it is not in the model_df.columns
-    if 'visit_month' not in model_df.columns:
-        model_df['visit_month'] = visit_month
-    
-    # find the columns in preds_cols that are not in the model_df.columns
-    not_in_pred_cols = [col for col in pred_cols if col not in model_df.columns]
+    # Load the saved model
+    model = joblib.load('../models/catboost_updrs_1_model_hyperopt_smote_meds.sav')
 
-    # create an empty dataframe with the columns in not_in_pred_cols
-    not_in_preds_df = pd.DataFrame(columns=not_in_pred_cols)
+    # Make predictions on the test data
+    X = df.drop(columns=['updrs_1_cat', 'kfold', 'visit_id', 'patient_id', 'updrs_1'])
 
-    # combine the model_df and the not_in_preds_df so all the needed columns are in dataframe
-    new_model_df = pd.concat([model_df, not_in_preds_df], axis=1)
-    
-    # fill the nan values with 0
-    new_model_df = new_model_df.fillna(0)
-
-    # filter the new_model_df to only include the columns in pred_cols with the correct order
-    return new_model_df[pred_cols]
+    preds = model.predict_proba(X)[:, 1]
 
 
 
+def predict_updrs2(df):
+
+    filename = '../models/xgboost_updrs_2_model_hyperopt_smote.sav'
+
+    # load the saved model
+    model = xgb.Booster()
+    model.load_model(filename)
+
+    # Make predictions on the test data
+    X = df.drop(columns=['updrs_2_cat', 'kfold', 'visit_id', 'patient_id', 'updrs_2'])
+
+    preds = model.predict(xgb.DMatrix(X))
 
 
 
-def create_submission_df(test_df, prot_test_df, pep_test_df, save_data=False):
-    
-    full_test_df = preprocess_test_df(test_df, prot_test_df, pep_test_df, save_data=False)
+def predict_updrs3(df):
 
-    final_pred_df = pd.DataFrame()
+    # Load the saved model
+    filename = '../models/lgboost_updrs_3_model_hyperopt_smote_meds.sav'
+    model = pickle.load(open(filename, 'rb'))
 
-    for updr in ['updrs_1', 'updrs_2', 'updrs_3', 'updrs_4']:
-        updr_df = full_test_df[full_test_df['updrs_test'] == updr]
-        info_cols = ['visit_id', 'visit_month', 'patient_id', 'updrs_test', 'row_id', 'group_key']
-        updr_info = updr_df[info_cols]
-        model_df = updr_df.drop(columns=info_cols)
-        
+    # Make predictions on the test data
+    X = df.drop(columns=['updrs_3_cat', 'kfold', 'visit_id', 'patient_id', 'updrs_3'])
 
-        for month in [0, 6, 12, 24]:
-            
-            # temporary fix for missing model
-            if updr == 'updrs_4' and month == 6:
-                print('----------RUNNING TEMPORARY FIX FOR MISSING MODEL----------')
-                # prepare the model_df for the correct month
-                model_df = prepare_model_df(model_df, updr, visit_month=0)
-            
-                # Load the saved model from file
-                model_path = f'..\models\model_rf_reg_updrs_4_0.pkl'
-                
-                
-                with open(model_path, 'rb') as f:
-                    rf_reg = pickle.load(f)
-
-                # Use the imported model to make predictions
-                y_pred_1 = rf_reg.predict(model_df.values)
-                
-        
-                # prepare the model_df for the correct month
-                model_df = prepare_model_df(model_df, updr, visit_month=12)
-                # Load the saved model from file
-                model_path = f'..\models\model_rf_reg_updrs_4_12.pkl'
-                
-                
-                with open(model_path, 'rb') as f:
-                    rf_reg = pickle.load(f)
-
-                # Use the imported model to make predictions
-                y_pred_2 = rf_reg.predict(model_df.values)
-                
-                y_pred = (y_pred_1 + y_pred_2) / len(y_pred_1)
-                
-                
-                updr_info[f'plus_{month}_months'] = y_pred
-                
-                
-            else:
-                # prepare the model_df for the correct month
-                model_df = prepare_model_df(model_df, updr, visit_month=month)
-            
-                # Load the saved model from file
-                model_path = f'..\models\model_rf_reg_{updr}_{month}.pkl'
-                
-                
-                with open(model_path, 'rb') as f:
-                    rf_reg = pickle.load(f)
-
-                # Use the imported model to make predictions
-                y_pred = rf_reg.predict(model_df.values)
-                
-                updr_info[f'plus_{month}_months'] = y_pred
-        
-        
-        final_pred_df = pd.concat([final_pred_df, updr_info])
-        
-    submit_df = pd.DataFrame(columns=['prediction_id', 'rating', 'group_key'])
-
-    for i, row in final_pred_df.iterrows():
-        for col in ['plus_0_months', 'plus_6_months', 'plus_12_months', 'plus_24_months']:
-            submit_df = submit_df.append({'prediction_id': row['row_id']+'_'+col, 'rating': row[col], 'group_key': row['group_key']}, ignore_index=True)
-
-    if save_data:
-        date = dt.datetime.today().strftime("%Y-%m-%d")
-        submit_df.to_csv(f'../data/submission_{date}.csv', index=False)
+    preds = model.predict_proba(X, verbose=-100)[:, 1]
 
 
-    
-    
+
 
 if __name__ == '__main__':
     
-    test_df = pd.read_csv('~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/raw/test.csv')
-    prot_test_df = pd.read_csv('~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/raw/test_proteins.csv')
-    pep_test_df = pd.read_csv('~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/raw/test_peptides.csv')
-
+    train_clin_df = pd.read_csv('../data/raw/train_clinical_data.csv')
+    train_prot_df = pd.read_csv('../data/raw/train_proteins.csv')
+    train_pep_df = pd.read_csv('../data/raw/train_peptides.csv')
+    clin_df = pd.read_csv('../data/raw/train_clinical_data.csv')
     
-    create_submission_df(test_df, prot_test_df, pep_test_df, save_data=True)
+    processed_dfs = preprocess_train_df(train_clin_df, train_prot_df, train_pep_df, save_data=False)
+
+    categorical_dfs = make_categorical_dataset(processed_dfs, train_prot_df)
+
+    categorical_dfs['updrs_1'] = add_med_data(clin_df, categorical_dfs['updrs_1'])
+    categorical_dfs['updrs_3'] = add_med_data(clin_df, categorical_dfs['updrs_3'])
+
+    predict_updrs1(categorical_dfs['updrs_1'])
+    predict_updrs2(categorical_dfs['updrs_2'])
+    predict_updrs3(categorical_dfs['updrs_3'])
