@@ -6,8 +6,8 @@ import pickle
 import warnings
 from catboost_future_cat_12m_train import convert_df_to_1yr
 from data.make_dataset import preprocess_train_df
-warnings.filterwarnings('ignore')
 
+warnings.filterwarnings("ignore")
 
 
 def make_categorical_dataset(processed_dfs, proteins_df):
@@ -20,11 +20,10 @@ def make_categorical_dataset(processed_dfs, proteins_df):
     updrs 4 categorical ratings: 4 and below is mild, 5 to 12 is moderate, 13 and above is severe
     """
     # read the data
-    updrs1_df = processed_dfs['updrs_1']
-    updrs2_df = processed_dfs['updrs_2']
-    updrs3_df = processed_dfs['updrs_3']
-    updrs4_df = processed_dfs['updrs_4']
-
+    updrs1_df = processed_dfs["updrs_1"]
+    updrs2_df = processed_dfs["updrs_2"]
+    updrs3_df = processed_dfs["updrs_3"]
+    updrs4_df = processed_dfs["updrs_4"]
 
     protein_list = list(proteins_df["UniProt"].unique())
 
@@ -86,85 +85,126 @@ def make_categorical_dataset(processed_dfs, proteins_df):
         np.where(updrs4_df["updrs_4"] <= 12, "moderate", "severe"),
     )
 
-    categorical_dfs = {'updrs_1':updrs1_df,
-                       'updrs_2':updrs2_df,
-                       'updrs_3':updrs3_df,
-                       'updrs_4':updrs4_df}
+    categorical_dfs = {
+        "updrs_1": updrs1_df,
+        "updrs_2": updrs2_df,
+        "updrs_3": updrs3_df,
+        "updrs_4": updrs4_df,
+    }
 
     return categorical_dfs
 
 
 def add_med_data(clin_df, updrs_df):
-    
-    clin_df['upd23b_clinical_state_on_medication'] = clin_df['upd23b_clinical_state_on_medication'].fillna('Unknown')
+    clin_df["upd23b_clinical_state_on_medication"] = clin_df[
+        "upd23b_clinical_state_on_medication"
+    ].fillna("Unknown")
 
     # get dummies for on_medication column
-    clin_df_dummies = pd.get_dummies(clin_df, columns=['upd23b_clinical_state_on_medication'], drop_first=True)
+    clin_df_dummies = pd.get_dummies(
+        clin_df, columns=["upd23b_clinical_state_on_medication"], drop_first=True
+    )
 
-    clin_df_dummies = clin_df_dummies[['visit_id', 'upd23b_clinical_state_on_medication_On', 'upd23b_clinical_state_on_medication_Unknown']]
+    clin_df_dummies = clin_df_dummies[
+        [
+            "visit_id",
+            "upd23b_clinical_state_on_medication_On",
+            "upd23b_clinical_state_on_medication_Unknown",
+        ]
+    ]
 
     # merge the updrs data with the clinical data for dummy columns
-    updrs_df = pd.merge(updrs_df, clin_df_dummies, on='visit_id')
+    updrs_df = pd.merge(updrs_df, clin_df_dummies, on="visit_id")
 
     return updrs_df
 
 
-
 def predict_updrs1(df):
-
     # Load the saved model
-    model = joblib.load('../models/catboost_updrs_1_model_hyperopt_smote_meds.sav')
+    model = joblib.load("../models/catboost_updrs_1_model_hyperopt_smote.sav")
 
     # Make predictions on the test data
-    X = df.drop(columns=['updrs_1_cat', 'kfold', 'visit_id', 'patient_id', 'updrs_1'])
+    X = df.drop(columns=["updrs_1_cat", "kfold", "visit_id", "patient_id", "updrs_1"])
 
     preds = model.predict_proba(X)[:, 1]
 
+    # use threshold of 0.48 to get the predicted updrs_1_cat
+    updrs_1_cat_preds = np.where(preds >= 0.46, 1, 0)
+
+    # add the column to the dataframe
+    df["updrs_1_cat_preds"] = updrs_1_cat_preds
+
+    return df
 
 
 def predict_updrs2(df):
-
-    filename = '../models/xgboost_updrs_2_model_hyperopt_smote.sav'
-
-    # load the saved model
-    model = xgb.Booster()
-    model.load_model(filename)
+    model = joblib.load("../models/catboost_updrs_2_model_hyperopt_smote_meds.sav")
 
     # Make predictions on the test data
-    X = df.drop(columns=['updrs_2_cat', 'kfold', 'visit_id', 'patient_id', 'updrs_2'])
+    X = df.drop(columns=["updrs_2_cat", "kfold", "visit_id", "patient_id", "updrs_2"])
 
-    preds = model.predict(xgb.DMatrix(X))
+    preds = model.predict_proba(X)[:, 1]
 
+    # use threshold of 0.22 to get the predicted updrs_2_cat
+    updrs_2_cat_preds = np.where(preds >= 0.22, 1, 0)
+
+    # add the column to the dataframe
+    df["updrs_2_cat_preds"] = updrs_2_cat_preds
+
+    return df
 
 
 def predict_updrs3(df):
-
     # Load the saved model
-    filename = '../models/lgboost_updrs_3_model_hyperopt_smote_meds.sav'
-    model = pickle.load(open(filename, 'rb'))
+    filename = "../models/lgboost_updrs_3_model_hyperopt_smote_meds.sav"
+    model = pickle.load(open(filename, "rb"))
 
     # Make predictions on the test data
-    X = df.drop(columns=['updrs_3_cat', 'kfold', 'visit_id', 'patient_id', 'updrs_3'])
+    X = df.drop(columns=["updrs_3_cat", "kfold", "visit_id", "patient_id", "updrs_3"])
 
     preds = model.predict_proba(X, verbose=-100)[:, 1]
 
+    # use threshold of 0.28 to get the predicted updrs_3_cat
+    updrs_3_cat_preds = np.where(preds >= 0.28, 1, 0)
+
+    # add the column to the dataframe
+    df["updrs_3_cat_preds"] = updrs_3_cat_preds
+
+    return df
 
 
+if __name__ == "__main__":
+    train_clin_df = pd.read_csv("../data/raw/train_clinical_data.csv")
+    train_prot_df = pd.read_csv("../data/raw/train_proteins.csv")
+    train_pep_df = pd.read_csv("../data/raw/train_peptides.csv")
+    clin_df = pd.read_csv("../data/raw/train_clinical_data.csv")
 
-if __name__ == '__main__':
-    
-    train_clin_df = pd.read_csv('../data/raw/train_clinical_data.csv')
-    train_prot_df = pd.read_csv('../data/raw/train_proteins.csv')
-    train_pep_df = pd.read_csv('../data/raw/train_peptides.csv')
-    clin_df = pd.read_csv('../data/raw/train_clinical_data.csv')
-    
-    processed_dfs = preprocess_train_df(train_clin_df, train_prot_df, train_pep_df, save_data=False)
+    processed_dfs = preprocess_train_df(
+        train_clin_df, train_prot_df, train_pep_df, save_data=False
+    )
 
     categorical_dfs = make_categorical_dataset(processed_dfs, train_prot_df)
 
-    categorical_dfs['updrs_1'] = add_med_data(clin_df, categorical_dfs['updrs_1'])
-    categorical_dfs['updrs_3'] = add_med_data(clin_df, categorical_dfs['updrs_3'])
+    categorical_dfs["updrs_2"] = add_med_data(clin_df, categorical_dfs["updrs_2"])
+    categorical_dfs["updrs_3"] = add_med_data(clin_df, categorical_dfs["updrs_3"])
 
-    predict_updrs1(categorical_dfs['updrs_1'])
-    predict_updrs2(categorical_dfs['updrs_2'])
-    predict_updrs3(categorical_dfs['updrs_3'])
+    updrs1_df = predict_updrs1(categorical_dfs["updrs_1"])
+    updrs2_df = predict_updrs2(categorical_dfs["updrs_2"])
+    updrs3_df = predict_updrs3(categorical_dfs["updrs_3"])
+
+    # combine prediction columns into one dataframe
+    updrs_preds = pd.merge(
+        updrs1_df,
+        updrs2_df[["visit_id", "updrs_2_cat", "updrs_2_cat_preds"]],
+        on="visit_id",
+    )
+
+    updrs_preds = pd.merge(
+        updrs_preds,
+        updrs3_df[["visit_id", "updrs_3_cat", "updrs_3_cat_preds"]],
+        on="visit_id",
+        how="left",
+    )
+
+    # save the dataframe as a csv
+    updrs_preds.to_csv("../data/predictions/full_updrs_preds.csv", index=False)
