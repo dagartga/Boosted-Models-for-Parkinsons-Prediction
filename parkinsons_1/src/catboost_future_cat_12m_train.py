@@ -27,7 +27,7 @@ def hyperparameter_tuning(
     int_vals = ["depth", "bagging_temperature", "min_data_in_leaf"]
     space = {k: (int(val) if k in int_vals else val) for k, val in space.items()}
     space["early_stopping_rounds"] = early_stopping_rounds
-    model = CatBoostClassifier(**space)
+    model = CatBoostClassifier(**space, iterations=300)
     evaluation = [(X_train, y_train), (X_test, y_test)]
     model.fit(X_train, y_train, eval_set=evaluation, verbose=False)
 
@@ -121,19 +121,24 @@ if __name__ == "__main__":
         X_train = train.drop(
             columns=[
                 "patient_id",
+                "visit_id",
                 "kfold",
                 f"{updrs}_cat",
             ]
-        )
-        y_train = train[f"{updrs}_cat"]
+        ).values
+
+        y_train = train[f"{updrs}_cat"].values
+
         X_test = test.drop(
             columns=[
                 "patient_id",
+                "visit_id",
                 "kfold",
                 f"{updrs}_cat",
             ]
-        )
-        y_test = test[f"{updrs}_cat"]
+        ).values
+
+        y_test = test[f"{updrs}_cat"].values
 
         label_encoder = LabelEncoder()
         y_train = label_encoder.fit_transform(y_train)
