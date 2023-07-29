@@ -184,8 +184,8 @@ if __name__ == "__main__":
 
     categorical_dfs = make_categorical_dataset(processed_dfs, train_prot_df)
 
-    categorical_dfs["updrs_2"] = add_med_data(clin_df, categorical_dfs["updrs_2"])
-    categorical_dfs["updrs_3"] = add_med_data(clin_df, categorical_dfs["updrs_3"])
+    categorical_dfs["updrs_2"] = add_med_data(train_clin_df, categorical_dfs["updrs_2"])
+    categorical_dfs["updrs_3"] = add_med_data(train_clin_df, categorical_dfs["updrs_3"])
 
     updrs1_df = predict_updrs1(categorical_dfs["updrs_1"])
     updrs2_df = predict_updrs2(categorical_dfs["updrs_2"])
