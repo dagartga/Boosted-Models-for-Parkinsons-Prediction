@@ -177,7 +177,6 @@ if __name__ == "__main__":
     train_clin_df = pd.read_csv("../data/raw/train_clinical_data.csv")
     train_prot_df = pd.read_csv("../data/raw/train_proteins.csv")
     train_pep_df = pd.read_csv("../data/raw/train_peptides.csv")
-    clin_df = pd.read_csv("../data/raw/train_clinical_data.csv")
 
     processed_dfs = preprocess_train_df(
         train_clin_df, train_prot_df, train_pep_df, save_data=False

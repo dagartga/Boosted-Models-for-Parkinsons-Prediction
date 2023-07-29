@@ -1,6 +1,0 @@
-updrs3_xgb_hyper
-colsample_bytree:0.7351379511863118
-eta:0.08882112700109265
-learning_rate:0.11268481350302417
-max_depth:0
-subsample:0.7174255278824012

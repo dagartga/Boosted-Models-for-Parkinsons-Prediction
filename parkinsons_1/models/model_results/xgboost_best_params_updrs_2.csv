@@ -1,2 +1,0 @@
-updrs,params
-updrs_2,"{'alpha': 0.987108498331858, 'colsample_bytree': 0.9025610783651246, 'eta': 0.09886596769492201, 'gamma': 0.6805060509936001, 'lambda': 0.8530856992445771, 'max_depth': 7.0, 'min_child_weight': 7.0, 'subsample': 0.8111712998278068}"
