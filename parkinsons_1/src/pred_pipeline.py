@@ -1,10 +1,8 @@
 import pandas as pd
 import numpy as np
-import xgboost as xgb
 import joblib
 import pickle
 import warnings
-from catboost_future_cat_12m_train import convert_df_to_1yr
 from data.make_dataset import preprocess_train_df
 
 warnings.filterwarnings("ignore")
@@ -178,29 +176,34 @@ if __name__ == "__main__":
     train_prot_df = pd.read_csv("../data/raw/train_proteins.csv")
     train_pep_df = pd.read_csv("../data/raw/train_peptides.csv")
 
-    processed_dfs = preprocess_train_df(
+    proc_dfs = preprocess_train_df(
         train_clin_df, train_prot_df, train_pep_df, save_data=False
     )
+    
+    # convert to only 12 month data since that was what was used for training
+    for updrs in ['updrs_1', 'updrs_2', 'updrs_3', 'updrs_4']:
+        temp_df = proc_dfs[updrs]
+        proc_dfs[updrs] = temp_df[temp_df['visit_month']<=12]
+        
+    cat_dfs = make_categorical_dataset(proc_dfs, train_prot_df)
 
-    categorical_dfs = make_categorical_dataset(processed_dfs, train_prot_df)
+    cat_dfs["updrs_2"] = add_med_data(train_clin_df, cat_dfs["updrs_2"])
+    cat_dfs["updrs_3"] = add_med_data(train_clin_df, cat_dfs["updrs_3"])
 
-    categorical_dfs["updrs_2"] = add_med_data(train_clin_df, categorical_dfs["updrs_2"])
-    categorical_dfs["updrs_3"] = add_med_data(train_clin_df, categorical_dfs["updrs_3"])
-
-    updrs1_df = predict_updrs1(categorical_dfs["updrs_1"])
-    updrs2_df = predict_updrs2(categorical_dfs["updrs_2"])
-    updrs3_df = predict_updrs3(categorical_dfs["updrs_3"])
+    pred_updrs1_df = predict_updrs1(cat_dfs["updrs_1"])
+    pred_updrs2_df = predict_updrs2(cat_dfs["updrs_2"])
+    pred_updrs3_df = predict_updrs3(cat_dfs["updrs_3"])
 
     # combine prediction columns into one dataframe
     updrs_preds = pd.merge(
-        updrs1_df,
-        updrs2_df[["visit_id", "updrs_2_cat", "updrs_2_cat_preds"]],
+        pred_updrs1_df,
+        pred_updrs2_df[["visit_id", "updrs_2_cat", "updrs_2_cat_preds"]],
         on="visit_id",
     )
 
     updrs_preds = pd.merge(
         updrs_preds,
-        updrs3_df[["visit_id", "updrs_3_cat", "updrs_3_cat_preds"]],
+        pred_updrs3_df[["visit_id", "updrs_3_cat", "updrs_3_cat_preds"]],
         on="visit_id",
         how="left",
     )
