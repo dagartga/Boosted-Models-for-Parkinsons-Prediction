@@ -179,12 +179,12 @@ if __name__ == "__main__":
     proc_dfs = preprocess_train_df(
         train_clin_df, train_prot_df, train_pep_df, save_data=False
     )
-    
+
     # convert to only 12 month data since that was what was used for training
-    for updrs in ['updrs_1', 'updrs_2', 'updrs_3', 'updrs_4']:
+    for updrs in ["updrs_1", "updrs_2", "updrs_3", "updrs_4"]:
         temp_df = proc_dfs[updrs]
-        proc_dfs[updrs] = temp_df[temp_df['visit_month']<=12]
-        
+        proc_dfs[updrs] = temp_df[temp_df["visit_month"] <= 12]
+
     cat_dfs = make_categorical_dataset(proc_dfs, train_prot_df)
 
     cat_dfs["updrs_2"] = add_med_data(train_clin_df, cat_dfs["updrs_2"])
