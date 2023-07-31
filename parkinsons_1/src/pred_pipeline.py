@@ -9,14 +9,13 @@ warnings.filterwarnings("ignore")
 
 
 def make_categorical_dataset(processed_dfs, proteins_df):
-    """
-    Turns the train_updrs.csv into a categorical dataset
-    based on the ratings:
-    updrs 1 categorical ratings: 10 and below is mild, 11 to 21 is moderate, 22 and above is severe
-    updrs 2 categorical ratings: 12 and below is mild, 13 to 29 is moderate, 30 and above is severe
-    updrs 3 categorical ratings: 32 and below is mild, 33 to 58 is moderate, 59 and above is severe
-    updrs 4 categorical ratings: 4 and below is mild, 5 to 12 is moderate, 13 and above is severe
-    """
+    # Turns the train_updrs.csv into a categorical dataset
+    # based on the ratings:
+    # updrs 1 categorical ratings: 10 and below is mild, 11 to 21 is moderate, 22 and above is severe
+    # updrs 2 categorical ratings: 12 and below is mild, 13 to 29 is moderate, 30 and above is severe
+    # updrs 3 categorical ratings: 32 and below is mild, 33 to 58 is moderate, 59 and above is severe
+    # updrs 4 categorical ratings: 4 and below is mild, 5 to 12 is moderate, 13 and above is severe
+
     # read the data
     updrs1_df = processed_dfs["updrs_1"]
     updrs2_df = processed_dfs["updrs_2"]
@@ -126,7 +125,7 @@ def predict_updrs1(df):
 
     preds = model.predict_proba(X)[:, 1]
 
-    # use threshold of 0.48 to get the predicted updrs_1_cat
+    # use threshold of 0.46 to get the predicted updrs_1_cat
     updrs_1_cat_preds = np.where(preds >= 0.46, 1, 0)
 
     # add the column to the dataframe
