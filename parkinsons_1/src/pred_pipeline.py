@@ -155,7 +155,9 @@ def predict_updrs2(df):
 def predict_updrs3(df):
     # Load the saved model
     filename = "../models/lgboost_updrs_3_model_hyperopt_smote_meds.sav"
-    model = pickle.load(open(filename, "rb"))
+
+    # model = pickle.load(open(filename, "rb"))
+    model = joblib.load(filename)
 
     # Make predictions on the test data
     X = df.drop(columns=["updrs_3_cat", "kfold", "visit_id", "patient_id", "updrs_3"])
