@@ -13,56 +13,76 @@ from data.make_dataset import preprocess_train_df
 warnings.filterwarnings("ignore")
 
 
-def make_categorical_dataset(input_data, cols):
-    
+def preprocess_input_data(input_data, cols):
+    input_df = pd.DataFrame(input_data, index=[0])
 
     # list of columns for information
     info_cols = [
         "visit_id",
         "patient_id",
         "visit_month",
-        "updrs_1",
-        "updrs_2",
-        "updrs_3",
-        "updrs_4",
-        "kfold",
     ]
+
+    if "upd23b_clinical_state_on_medication" in input_df.columns:
+        info_cols.append("upd23b_clinical_state_on_medication")
+
+    info_df = input_df[info_cols]
+    prot_pep_df = input_df.drop(columns=info_cols)
+
+    # use regex to get the peptide columns which have a pattern "_"
+    regex = re.compile(".*_.*")
+    # list of peptide columns
+    peptide_list = list(filter(regex.match, prot_pep_df.columns))
+    # get the list of protein columns
+    protein_list = list(set(prot_pep_df.columns) - set(peptide_list))
 
     prot_pep_cols = protein_list + peptide_list
 
     # add a column for the number of proteins and peptides present
-    updrs1_df["num_prot_pep"] = updrs1_df[prot_pep_cols].sum(axis=1)
+    prot_pep_df["num_prot_pep"] = prot_pep_df[prot_pep_cols].sum(axis=1)
 
     # number of proteins
-    updrs1_df["num_prot"] = updrs1_df[protein_list].sum(axis=1)
+    prot_pep_df["num_prot"] = prot_pep_df[protein_list].sum(axis=1)
 
     # number of peptides
-    updrs1_df["num_pept"] = updrs1_df[peptide_list].sum(axis=1)
-
+    prot_pep_df["num_pept"] = prot_pep_df[peptide_list].sum(axis=1)
 
     return info_df, prot_pep_df
 
 
 def add_med_data(info_df, prot_pep_df):
-    
-    
-    if 'upd23b_clinical_state_on_medication' not in info_df.columns:
-        info_df['upd23b_clinical_state_on_medication'] = 'Unknown'
-    elif ~info_df['upd23b_clinical_state_on_medication'].isin(['On', 'Off', 'Unknown', None]).any():
-        raise ValueError('upd23b_clinical_state_on_medication column must contain only On, Off, Unknown, or None')
+    if "upd23b_clinical_state_on_medication" not in info_df.columns:
+        info_df["upd23b_clinical_state_on_medication"] = "Unknown"
+    elif (
+        ~info_df["upd23b_clinical_state_on_medication"]
+        .isin(["On", "Off", "Unknown", None])
+        .any()
+    ):
+        raise ValueError(
+            "upd23b_clinical_state_on_medication column must contain only On, Off, Unknown, or None"
+        )
     else:
-        info_df['upd23b_clinical_state_on_medication'] = info_df['upd23b_clinical_state_on_medication'].fillna('Unknown')
-        
-    info_df['upd23b_clinical_state_on_medication_On'] = np.where(info_df['upd23b_clinical_state_on_medication'] == 'On', 1, 0)
-    info_df['upd23b_clinical_state_on_medication_Unknown'] = np.where(info_df['upd23b_clinical_state_on_medication'] == 'Unknown', 1, 0)
+        info_df["upd23b_clinical_state_on_medication"] = info_df[
+            "upd23b_clinical_state_on_medication"
+        ].fillna("Unknown")
+
+    info_df["upd23b_clinical_state_on_medication_On"] = np.where(
+        info_df["upd23b_clinical_state_on_medication"] == "On", 1, 0
+    )
+    info_df["upd23b_clinical_state_on_medication_Unknown"] = np.where(
+        info_df["upd23b_clinical_state_on_medication"] == "Unknown", 1, 0
+    )
 
     # drop the original column
     info_df.drop("upd23b_clinical_state_on_medication", axis=1, inplace=True)
     # list of dummy columns
-    dummy_cols = ['upd23b_clinical_state_on_medication_On', 'upd23b_clinical_state_on_medication_Unknown']
+    dummy_cols = [
+        "upd23b_clinical_state_on_medication_On",
+        "upd23b_clinical_state_on_medication_Unknown",
+    ]
     # add the dummy columns to the prot_pep_df
     final_df = pd.concat([info_df[dummy_cols], prot_pep_df], axis=1)
-    
+
     return final_df
 
 
@@ -121,4 +141,17 @@ def predict_updrs3(df):
 
 
 if __name__ == "__main__":
+    # get the model_columns.txt data from json string
+    with open("model_columns.txt", "r") as f:
+        cols = json.load(f)
 
+    cols = cols["columns"]
+
+    input_data1 = pd.read_csv("../data/processed/train_updrs_1.csv")
+    input_data1 = input_data1.drop(columns=["updrs_1", "kfold"])
+
+    input_data1 = input_data1.iloc[0:1, :]
+
+    df1, df2 = preprocess_input_data(input_data1, cols)
+
+    final_df = add_med_data(df1, df2)
