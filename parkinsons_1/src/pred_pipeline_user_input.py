@@ -99,7 +99,7 @@ def predict_updrs1(df):
     updrs_1_cat_preds = np.where(preds >= 0.46, 1, 0)
 
     # add the column to the dataframe
-    df["updrs_1_cat_preds"] = updrs_1_cat_preds
+    df["updrs_1_max_cat_preds"] = updrs_1_cat_preds
 
     return df
 
@@ -116,7 +116,7 @@ def predict_updrs2(df):
     updrs_2_cat_preds = np.where(preds >= 0.22, 1, 0)
 
     # add the column to the dataframe
-    df["updrs_2_cat_preds"] = updrs_2_cat_preds
+    df["updrs_2_max_cat_preds"] = updrs_2_cat_preds
 
     return df
 
@@ -135,7 +135,7 @@ def predict_updrs3(df):
     updrs_3_cat_preds = np.where(preds >= 0.28, 1, 0)
 
     # add the column to the dataframe
-    df["updrs_3_cat_preds"] = updrs_3_cat_preds
+    df["updrs_3_max_cat_preds"] = updrs_3_cat_preds
 
     return df
 
@@ -155,3 +155,16 @@ if __name__ == "__main__":
     df1, df2 = preprocess_input_data(input_data1, cols)
 
     final_df = add_med_data(df1, df2)
+
+    # add the visit_month column
+    final_df["visit_month"] = input_data1["visit_month"]
+
+    # get the columns for updrs_1 from updrs1_cols.txt
+    with open("updrs1_cols.txt", "r") as f:
+        updrs1_cols = json.load(f)
+
+    updrs1_df = final_df[updrs1_cols]
+
+    updrs1_preds = predict_updrs1(updrs1_df)
+
+    print(updrs1_preds["updrs_1_max_cat_preds"])
