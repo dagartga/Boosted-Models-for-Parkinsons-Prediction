@@ -13,6 +13,33 @@ from data.make_dataset import preprocess_train_df
 warnings.filterwarnings("ignore")
 
 
+def fill_columns(df, updrs):
+    # get the columns for updrs from updrs_cols.txt
+    with open(f"{updrs}_cols.txt", "r") as f:
+        updrs_cols = json.load(f)
+
+    info_cols = [
+        "visit_month",
+        "num_prot_pep",
+        "num_prot",
+        "num_pept",
+        "upd23b_clinical_state_on_medication",
+        "visit_id",
+        "patient_id",
+        "kfold",
+        updrs,
+    ]
+
+    prot_pep_cols = [col for col in updrs_cols if col not in info_cols]
+
+    missing_cols = [col for col in prot_pep_cols if col not in df.columns]
+
+    # fill the missing columns with 0
+    df[missing_cols] = 0
+
+    return df
+
+
 def preprocess_input_data(input_data, cols):
     input_df = pd.DataFrame(input_data, index=[0])
 
@@ -143,24 +170,30 @@ def predict_updrs3(df):
 if __name__ == "__main__":
     # get the model_columns.txt data from json string
     with open("model_columns.txt", "r") as f:
-        cols = json.load(f)
+        dict_cols = json.load(f)
 
     for updrs in ["updrs_1", "updrs_2", "updrs_3"]:
-        cols = cols["columns"]
+        cols = dict_cols["columns"]
 
         input_data1 = pd.read_csv(f"../data/processed/train_{updrs}.csv")
         input_data1 = input_data1.drop(columns=[f"{updrs}", "kfold"])
 
         input_data1 = input_data1.iloc[0:1, :]
 
-        info_df, prot_pep_df = preprocess_input_data(input_data1, cols)
+        full_input = fill_columns(input_data1, updrs)
+
+        info_df, prot_pep_df = preprocess_input_data(full_input, cols)
 
         final_df = add_med_data(info_df, prot_pep_df)
 
         # add the visit_month column
         final_df["visit_month"] = input_data1["visit_month"]
 
-        # get the columns for updrs_1 from updrs1_cols.txt
+        # drop any duplicate columns
+        duplicate_columns = final_df.columns[final_df.columns.duplicated()]
+        final_df = final_df.drop(columns=duplicate_columns)
+
+        # get the columns for updrs from updrs_cols.txt
         with open(f"{updrs}_cols.txt", "r") as f:
             updrs_cols = json.load(f)
 
@@ -169,14 +202,20 @@ if __name__ == "__main__":
         if updrs == "updrs_1":
             updrs1_preds = predict_updrs1(updrs_df)
 
-            print(f"UPDRS 1 Max Category Prediction: {updrs1_preds["updrs_1_max_cat_preds"]}")
-        
+            print(
+                f"UPDRS 1 Max Category Prediction: {updrs1_preds[f'{updrs}_max_cat_preds'].values[0]}"
+            )
+
         if updrs == "updrs_2":
             updrs2_preds = predict_updrs2(updrs_df)
 
-            print(f"UPDRS 2 Max Category Prediction: {updrs2_preds["updrs_2_max_cat_preds"]}")
+            print(
+                f"UPDRS 2 Max Category Prediction: {updrs2_preds[f'{updrs}_max_cat_preds'].values[0]}"
+            )
 
         if updrs == "updrs_3":
             updrs3_preds = predict_updrs3(updrs_df)
 
-            print(f"UPDRS 3 Max Category Prediction: {updrs3_preds["updrs_3_max_cat_preds"]}")
+            print(
+                f"UPDRS 3 Max Category Prediction: {updrs3_preds[f'{updrs}_max_cat_preds'].values[0]}"
+            )
