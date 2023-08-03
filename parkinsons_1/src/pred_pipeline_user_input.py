@@ -145,26 +145,38 @@ if __name__ == "__main__":
     with open("model_columns.txt", "r") as f:
         cols = json.load(f)
 
-    cols = cols["columns"]
+    for updrs in ["updrs_1", "updrs_2", "updrs_3"]:
+        cols = cols["columns"]
 
-    input_data1 = pd.read_csv("../data/processed/train_updrs_1.csv")
-    input_data1 = input_data1.drop(columns=["updrs_1", "kfold"])
+        input_data1 = pd.read_csv(f"../data/processed/train_{updrs}.csv")
+        input_data1 = input_data1.drop(columns=[f"{updrs}", "kfold"])
 
-    input_data1 = input_data1.iloc[0:1, :]
+        input_data1 = input_data1.iloc[0:1, :]
 
-    df1, df2 = preprocess_input_data(input_data1, cols)
+        info_df, prot_pep_df = preprocess_input_data(input_data1, cols)
 
-    final_df = add_med_data(df1, df2)
+        final_df = add_med_data(info_df, prot_pep_df)
 
-    # add the visit_month column
-    final_df["visit_month"] = input_data1["visit_month"]
+        # add the visit_month column
+        final_df["visit_month"] = input_data1["visit_month"]
 
-    # get the columns for updrs_1 from updrs1_cols.txt
-    with open("updrs1_cols.txt", "r") as f:
-        updrs1_cols = json.load(f)
+        # get the columns for updrs_1 from updrs1_cols.txt
+        with open(f"{updrs}_cols.txt", "r") as f:
+            updrs_cols = json.load(f)
 
-    updrs1_df = final_df[updrs1_cols]
+        updrs_df = final_df[updrs_cols]
 
-    updrs1_preds = predict_updrs1(updrs1_df)
+        if updrs == "updrs_1":
+            updrs1_preds = predict_updrs1(updrs_df)
 
-    print(updrs1_preds["updrs_1_max_cat_preds"])
+            print(f"UPDRS 1 Max Category Prediction: {updrs1_preds["updrs_1_max_cat_preds"]}")
+        
+        if updrs == "updrs_2":
+            updrs2_preds = predict_updrs2(updrs_df)
+
+            print(f"UPDRS 2 Max Category Prediction: {updrs2_preds["updrs_2_max_cat_preds"]}")
+
+        if updrs == "updrs_3":
+            updrs3_preds = predict_updrs3(updrs_df)
+
+            print(f"UPDRS 3 Max Category Prediction: {updrs3_preds["updrs_3_max_cat_preds"]}")
