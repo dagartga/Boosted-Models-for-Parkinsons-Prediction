@@ -170,6 +170,8 @@ def get_all_updrs_preds(input_data):
     # convert the json input to a dataframe
     input_df = pd.DataFrame(input_data, index=[0])
 
+    visit_id = input_df["visit_id"].values[0]
+
     for updrs in ["updrs_1", "updrs_2", "updrs_3"]:
         with open(f"{updrs}_cols.txt", "r") as f:
             cols = json.load(f)
@@ -186,7 +188,7 @@ def get_all_updrs_preds(input_data):
         final_df = add_med_data(info_df, prot_pep_df)
 
         # add the visit_month column
-        final_df["visit_month"] = input_df["visit_month"]
+        final_df["visit_month"] = input_df["visit_month"].astype(int)
 
         # make sure there are no duplicates
         final_df = final_df.loc[:, ~final_df.columns.duplicated()].copy()
@@ -213,6 +215,20 @@ def get_all_updrs_preds(input_data):
             print(
                 f"UPDRS 3 Max Category Prediction: {updrs3_preds[f'{updrs}_max_cat_preds'].values[0]}"
             )
+
+    # join the predictions
+    updrs_preds = pd.concat(
+        [
+            updrs1_preds[["updrs_1_max_cat_preds"]],
+            updrs2_preds[["updrs_2_max_cat_preds"]],
+            updrs3_preds[["updrs_3_max_cat_preds"]],
+        ],
+        axis=1,
+    )
+
+    updrs_preds["visit_id"] = visit_id
+
+    return updrs_preds
 
 
 if __name__ == "__main__":

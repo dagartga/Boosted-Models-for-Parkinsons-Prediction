@@ -10,15 +10,15 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello_world():
-    return "<p>Welcome to the Parkinsons Prediction</p>"
+    return "<p>Welcome to the Parkinsons Prediction API</p>"
 
 
 @app.route("/test_predict", methods=["GET"])
 def test_predict():
     input_data = {
-        "visit_month": 60,
-        "patient_id": 24343,
-        "visit_id": 1,
+        "visit_month": "12",
+        "patient_id": "24343",
+        "visit_id": "24343_12",
     }
 
     input_df = pd.DataFrame(input_data, index=[0])

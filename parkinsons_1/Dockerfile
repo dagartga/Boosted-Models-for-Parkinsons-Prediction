@@ -12,8 +12,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./webapp/* /webapp
 
-COPY ./models/prod_models/* /webapp
-
 ENTRYPOINT ["python"]
 
 CMD ["app.py"]
