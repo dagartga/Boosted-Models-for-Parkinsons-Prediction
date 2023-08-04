@@ -32,9 +32,9 @@ def test_predict():
 
 
 @app.route("/predict", methods=["POST"])
-def predict(payload):
+def predict():
     # convert the json input to a dataframe
-    input_df = pd.DataFrame(payload, index=[0])
+    input_df = pd.DataFrame(request.json, index=[0])
 
     # get the predictions
     updrs_preds = get_all_updrs_preds(input_df)
