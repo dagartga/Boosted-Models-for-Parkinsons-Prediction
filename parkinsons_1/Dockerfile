@@ -8,9 +8,9 @@ COPY ./requirements.txt /webapp/requirements.txt
 
 WORKDIR /webapp
 
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ./app.py /webapp
+COPY ./webapp/* /webapp
 
 COPY ./models/prod_models/* /webapp
 
