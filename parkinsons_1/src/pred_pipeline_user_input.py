@@ -40,7 +40,7 @@ def fill_columns(df, updrs):
     return df
 
 
-def preprocess_input_data(input_data, cols):
+def preprocess_input_data(input_data):
     input_df = pd.DataFrame(input_data, index=[0])
 
     # list of columns for information
@@ -168,12 +168,9 @@ def predict_updrs3(df):
 
 
 if __name__ == "__main__":
-    # get the model_columns.txt data from json string
-    with open("model_columns.txt", "r") as f:
-        dict_cols = json.load(f)
-
     for updrs in ["updrs_1", "updrs_2", "updrs_3"]:
-        cols = dict_cols["columns"]
+        with open(f"{updrs}_cols.txt", "r") as f:
+            cols = json.load(f)
 
         input_data1 = pd.read_csv(f"../data/processed/train_{updrs}.csv")
         input_data1 = input_data1.drop(columns=[f"{updrs}", "kfold"])
@@ -182,22 +179,16 @@ if __name__ == "__main__":
 
         full_input = fill_columns(input_data1, updrs)
 
-        info_df, prot_pep_df = preprocess_input_data(full_input, cols)
+        info_df, prot_pep_df = preprocess_input_data(full_input)
 
         final_df = add_med_data(info_df, prot_pep_df)
 
         # add the visit_month column
         final_df["visit_month"] = input_data1["visit_month"]
 
-        # drop any duplicate columns
-        duplicate_columns = final_df.columns[final_df.columns.duplicated()]
-        final_df = final_df.drop(columns=duplicate_columns)
+        final_df = final_df.loc[:, ~final_df.columns.duplicated()].copy()
 
-        # get the columns for updrs from updrs_cols.txt
-        with open(f"{updrs}_cols.txt", "r") as f:
-            updrs_cols = json.load(f)
-
-        updrs_df = final_df[updrs_cols]
+        updrs_df = final_df[cols]
 
         if updrs == "updrs_1":
             updrs1_preds = predict_updrs1(updrs_df)
