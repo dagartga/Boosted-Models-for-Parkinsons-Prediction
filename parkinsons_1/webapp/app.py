@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify
 
 import pandas as pd
 import joblib
-import pickle
 from pred_pipeline_user_input_app import get_all_updrs_preds
 
 
