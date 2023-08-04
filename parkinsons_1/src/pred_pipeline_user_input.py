@@ -167,25 +167,29 @@ def predict_updrs3(df):
     return df
 
 
-if __name__ == "__main__":
+def get_all_updrs_preds(input_data):
+    # convert the json input to a dataframe
+    input_df = pd.DataFrame(input_data, index=[0])
+
     for updrs in ["updrs_1", "updrs_2", "updrs_3"]:
         with open(f"{updrs}_cols.txt", "r") as f:
             cols = json.load(f)
 
-        input_data1 = pd.read_csv(f"../data/processed/train_{updrs}.csv")
-        input_data1 = input_data1.drop(columns=[f"{updrs}", "kfold"])
+        if updrs in input_df.columns:
+            input_df = input_df.drop(columns=[f"{updrs}"])
+        if "kfold" in input_df.columns:
+            input_df = input_df.drop(columns=["kfold"])
 
-        input_data1 = input_data1.iloc[0:1, :]
-
-        full_input = fill_columns(input_data1, updrs)
+        full_input = fill_columns(input_df, updrs)
 
         info_df, prot_pep_df = preprocess_input_data(full_input)
 
         final_df = add_med_data(info_df, prot_pep_df)
 
         # add the visit_month column
-        final_df["visit_month"] = input_data1["visit_month"]
+        final_df["visit_month"] = input_df["visit_month"]
 
+        # make sure there are no duplicates
         final_df = final_df.loc[:, ~final_df.columns.duplicated()].copy()
 
         updrs_df = final_df[cols]
@@ -210,3 +214,12 @@ if __name__ == "__main__":
             print(
                 f"UPDRS 3 Max Category Prediction: {updrs3_preds[f'{updrs}_max_cat_preds'].values[0]}"
             )
+
+
+if __name__ == "__main__":
+    input_data = {
+        "visit_month": 60,
+        "patient_id": 24343,
+        "visit_id": 1,
+    }
+    get_all_updrs_preds(input_data)
