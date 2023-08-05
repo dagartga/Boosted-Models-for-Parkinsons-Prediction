@@ -113,6 +113,7 @@ def add_med_data(clin_df, updrs_df):
     Returns:
         updrs_df: the dataframe with the updrs_1_cat_preds column added
     """
+
     clin_df["upd23b_clinical_state_on_medication"] = clin_df[
         "upd23b_clinical_state_on_medication"
     ].fillna("Unknown")
@@ -151,7 +152,10 @@ def predict_updrs1(df):
     # Make predictions on the test data
     X = df.drop(columns=["updrs_1_cat", "kfold", "visit_id", "patient_id", "updrs_1"])
 
-    preds = model.predict_proba(X)[:, 1]
+    try:
+        preds = model.predict_proba(X)[:, 1]
+    except AttributeError as e:
+        print(f"Error: {e}")
 
     # use threshold of 0.46 to get the predicted updrs_1_cat
     updrs_1_cat_preds = np.where(preds >= 0.46, 1, 0)
@@ -176,7 +180,10 @@ def predict_updrs2(df):
     # Make predictions on the test data
     X = df.drop(columns=["updrs_2_cat", "kfold", "visit_id", "patient_id", "updrs_2"])
 
-    preds = model.predict_proba(X)[:, 1]
+    try:
+        preds = model.predict_proba(X)[:, 1]
+    except AttributeError as e:
+        print(f"Error: {e}")
 
     # use threshold of 0.22 to get the predicted updrs_2_cat
     updrs_2_cat_preds = np.where(preds >= 0.22, 1, 0)
@@ -205,7 +212,10 @@ def predict_updrs3(df):
     # Make predictions on the test data
     X = df.drop(columns=["updrs_3_cat", "kfold", "visit_id", "patient_id", "updrs_3"])
 
-    preds = model.predict_proba(X, verbose=-100)[:, 1]
+    try:
+        preds = model.predict_proba(X, verbose=-100)[:, 1]
+    except AttributeError as e:
+        print(f"Error: {e}")
 
     # use threshold of 0.28 to get the predicted updrs_3_cat
     updrs_3_cat_preds = np.where(preds >= 0.28, 1, 0)
