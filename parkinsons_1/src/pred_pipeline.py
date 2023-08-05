@@ -16,6 +16,13 @@ def make_categorical_dataset(processed_dfs, proteins_df):
     updrs 2 categorical ratings: 12 and below is mild, 13 to 29 is moderate, 30 and above is severe
     updrs 3 categorical ratings: 32 and below is mild, 33 to 58 is moderate, 59 and above is severe
     updrs 4 categorical ratings: 4 and below is mild, 5 to 12 is moderate, 13 and above is severe
+
+    Args:
+        processed_df: dataframe with one row per visit_month containing all of the protein and peptide columns
+        proteins_df: dataframe with the UniProt column and the peptide columns
+
+    Returns:
+        categorical_df: dataframe with the updrs values as categorical values based on the ratings as well as the proteins and peptides values
     """
 
     # read the data
@@ -95,6 +102,17 @@ def make_categorical_dataset(processed_dfs, proteins_df):
 
 
 def add_med_data(clin_df, updrs_df):
+    """
+    Takes in the separate upd23b_clinical_state_on_medication data.
+    Creates dummy columns and adds them to the updrs dataset for the clinical medication data
+
+    Args:
+        clin_df: dataframe with the upd23b_clinical_state_on_medication column and visit_id column
+        updrs_df: dataframe with the all of the protein, peptide, visit_id, visit_month, and patient_id columns
+
+    Returns:
+        updrs_df: the dataframe with the updrs_1_cat_preds column added
+    """
     clin_df["upd23b_clinical_state_on_medication"] = clin_df[
         "upd23b_clinical_state_on_medication"
     ].fillna("Unknown")
@@ -119,6 +137,14 @@ def add_med_data(clin_df, updrs_df):
 
 
 def predict_updrs1(df):
+    """Predict the updrs_1_cat column for the provided dataframe using saved CatBoost Classifier model.
+
+    Args:
+        df: the dataframe with the updrs_1_cat column to be predicted
+
+    Returns:
+        df: the dataframe with the updrs_1_cat_preds column added
+    """
     # Load the saved model
     model = joblib.load("../models/catboost_updrs_1_model_hyperopt_smote.sav")
 
@@ -137,6 +163,14 @@ def predict_updrs1(df):
 
 
 def predict_updrs2(df):
+    """Predict the updrs_2_cat column for the provided dataframe using saved CatBoost Classifier model.
+
+    Args:
+        df: the dataframe with the updrs_2_cat column to be predicted
+
+    Returns:
+        df: the dataframe with the updrs_2_cat_preds column added
+    """
     model = joblib.load("../models/catboost_updrs_2_model_hyperopt_smote_meds.sav")
 
     # Make predictions on the test data
@@ -154,6 +188,14 @@ def predict_updrs2(df):
 
 
 def predict_updrs3(df):
+    """Predict the updrs_3_cat column for the provided dataframe using saved LightGBM Classifier model.
+
+    Args:
+        df: the dataframe with the updrs_3_cat column to be predicted
+
+    Returns:
+        df: the dataframe with the updrs_3_cat_preds column added
+    """
     # Load the saved model
     filename = "../models/lgboost_updrs_3_model_hyperopt_smote_meds.sav"
 
