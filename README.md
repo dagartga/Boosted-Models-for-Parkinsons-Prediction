@@ -8,6 +8,10 @@ Using the first 12 months of doctor's visits where protein mass spectometry data
     updrs 1 categorical ratings: 10 and below is mild, 11 to 21 is moderate, 22 and above is severe
     updrs 2 categorical ratings: 12 and below is mild, 13 to 29 is moderate, 30 and above is severe
     updrs 3 categorical ratings: 32 and below is mild, 33 to 58 is moderate, 59 and above is severe
+    updrs 4 was dropped due to too few samples for training
+
+### Data Source
+The raw data can be found at [Kaggle Parkinsons Dataset](https://www.kaggle.com/competitions/amp-parkinsons-disease-progression-prediction/data)
 
 Project Organization
 ------------
