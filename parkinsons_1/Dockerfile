@@ -4,7 +4,7 @@ ARG VERSION
 
 LABEL org.label-schema.version=$VERSION
 
-COPY ./requirements.txt /webapp/requirements.txt
+COPY ./webapp/requirements.txt /webapp/requirements.txt
 
 WORKDIR /webapp
 
