@@ -13,6 +13,21 @@ Using the first 12 months of doctor's visits where protein mass spectometry data
 ### Data Source
 The raw data can be found at [Kaggle Parkinsons Dataset](https://www.kaggle.com/competitions/amp-parkinsons-disease-progression-prediction/data)
 
+## To Use this Project
+
+#### Option 1:
+Take the Kaggle dataset and get predictions for each of the patients
+- Take the file train_peptides.csv, train_proteins.csv, train_clinical_data.csv from Kaggle link in the Data Source section of this README. Place those files csv files in the ./data/raw/ directory
+- Create a python virtual environment
+- Use the Makefile to install requirements: `$ make install`
+- CD into the src/ directory and run the prediciton pipeline: `$ python pred_pipeline.py`
+- This will process all of the raw data and run predictions with the trained models, which can be found in ./models/prod_models/, and a new file called full_updrs_preds.csv will be created in the ./data/predictions/ directory
+   - The predictions will have the column names: 
+    - "updrs_1_cat_preds" 
+    - "updrs_2_cat_preds"
+    - "updrs_3_cat_preds"
+
+
 Project Organization
 ------------
 
