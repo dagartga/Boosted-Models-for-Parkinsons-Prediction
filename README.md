@@ -15,6 +15,7 @@ The raw data can be found at [Kaggle Parkinsons Dataset](https://www.kaggle.com/
 
 ## To Use this Project
 
+### Make Predictions
 #### Option 1:
 Take the Kaggle dataset and get predictions for each of the patients
 - Take the file train_peptides.csv, train_proteins.csv, train_clinical_data.csv from Kaggle link in the Data Source section of this README. Place those files csv files in the ./data/raw/ directory
@@ -26,6 +27,14 @@ Take the Kaggle dataset and get predictions for each of the patients
     - "updrs_1_cat_preds" 
     - "updrs_2_cat_preds"
     - "updrs_3_cat_preds"
+
+#### Option 2:
+Take user input of protein and peptide data and perform a prediction, or use the example .json files from ./data/api_examples/ to return a prediction.
+- Build the docker image
+- Run the docker container in port 5000
+- Confirm it is running by visiting http://localhost:5000 in the web browser
+- Make an API request: `$ python api_request.py`
+- A json file will be stored in ./data/predictions/ with the name visit_id_prediction.json
 
 
 Project Organization
