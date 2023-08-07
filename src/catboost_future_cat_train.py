@@ -59,17 +59,11 @@ def preprocess_categorical_df(df, target):
 
 if __name__ == "__main__":
     # read the training data
-    updrs1_df = pd.read_csv(
-        "~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_updrs_1_cat.csv"
-    )
+    updrs1_df = pd.read_csv("../data/processed/train_updrs_1_cat.csv")
 
-    updrs2_df = pd.read_csv(
-        "~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_updrs_2_cat.csv"
-    )
+    updrs2_df = pd.read_csv("../data/processed/train_updrs_2_cat.csv")
 
-    updrs3_df = pd.read_csv(
-        "~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_updrs_3_cat.csv"
-    )
+    updrs3_df = pd.read_csv("../data/processed/train_updrs_3_cat.csv")
 
     df = updrs1_df
     updrs = "updrs_1"
@@ -112,7 +106,6 @@ if __name__ == "__main__":
         y_train = label_encoder.fit_transform(y_train)
         y_test = label_encoder.fit_transform(y_test)
 
-        
         options = {
             "depth": scope.int(hp.quniform("depth", 4, 10, 1)),
             "learning_rate": hp.loguniform("learning_rate", -7, 0),

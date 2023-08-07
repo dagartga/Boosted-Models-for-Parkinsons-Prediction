@@ -69,17 +69,11 @@ def optmize(params, param_names, x, y):
 
 if __name__ == "__main__":
     # read the training data
-    updrs1_df = pd.read_csv(
-        "~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_updrs_1.csv"
-    )
+    updrs1_df = pd.read_csv("../data/processed/train_updrs_1.csv")
 
-    updrs2_df = pd.read_csv(
-        "~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_updrs_2.csv"
-    )
+    updrs2_df = pd.read_csv("../data/processed/train_updrs_2.csv")
 
-    updrs3_df = pd.read_csv(
-        "~/parkinsons_proj_1/parkinsons_project/parkinsons_1/data/processed/train_updrs_3.csv"
-    )
+    updrs3_df = pd.read_csv("../data/processed/train_updrs_3.csv")
 
     for updrs, df in zip(
         ["updrs_1", "updrs_2", "updrs_3"], [updrs1_df, updrs2_df, updrs3_df]
