@@ -78,6 +78,12 @@ target/
 # ingore predictions csv
 data/predictions/full_updrs_preds.csv
 
+# ignore new features
+data/processed/train_new_feats_updrs_1.csv
+data/processed/train_new_feats_updrs_2.csv
+data/processed/train_new_feats_updrs_3.csv
+data/processed/train_new_feats_updrs_4.csv
+
 # Mac OS-specific storage files
 .DS_Store
 
