@@ -29,7 +29,7 @@ Take the Kaggle dataset and get predictions for each of the patients
     - "updrs_3_cat_preds"
 
 #### Option 2:
-Take user input of protein and peptide data and perform a prediction, or use the example .json files from ./data/api_examples/ to return a prediction.
+Take user input of protein and peptide data and perform a prediction, or use the example .json files from ./api_examples/ to return a prediction.
 - Build the docker image
 - Run the docker container in port 5000
 - Confirm it is running by visiting http://localhost:5000 in the web browser
