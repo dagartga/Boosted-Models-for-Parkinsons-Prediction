@@ -12,6 +12,31 @@ import argparse
 warnings.filterwarnings("ignore")
 
 
+def dump_json_file(file_path):
+    try:
+        with open(file_path, "r") as file:
+            data = json.load(file)
+            return data
+    except FileNotFoundError:
+        print(f"Error: File '{file_path}' not found.")
+    except json.JSONDecodeError:
+        print(
+            f"Error: Unable to parse the JSON file '{file_path}'. It might be invalid JSON."
+        )
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+
+def load_json():
+    parser = argparse.ArgumentParser(description="Dump the contents of a JSON file.")
+    parser.add_argument("file_path", type=str, help="Path to the JSON file")
+    args = parser.parse_args()
+
+    file_path = args.file_path
+    data = dump_json_file(file_path)
+    return data
+
+
 def fill_columns(df, updrs):
     # get the columns for updrs from updrs_cols.txt
     with open(f"{updrs}_cols.txt", "r") as f:
@@ -214,11 +239,17 @@ def get_all_updrs_preds(input_data):
                 f"UPDRS 3 Max Category Prediction: {updrs3_preds[f'{updrs}_max_cat_preds'].values[0]}"
             )
 
+        # concatenate the dataframes
+        final_df = pd.concat([info_df, prot_pep_df], axis=0)
+
+        # save the dataframe to a json file
+        final_df.to_json(
+            f"./data/predictions/{input_df['visit_id'].values[0]}_prediction.json"
+        )
+
 
 if __name__ == "__main__":
-    input_data = {
-        "visit_month": 60,
-        "patient_id": 24343,
-        "visit_id": 1,
-    }
+    # import the data from the file path passed as an argument
+    input_data = load_json()
+
     get_all_updrs_preds(input_data)
