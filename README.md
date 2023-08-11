@@ -20,9 +20,9 @@ The raw data can be found at [Kaggle Parkinsons Dataset](https://www.kaggle.com/
 Take the Kaggle dataset and get predictions for each of the patients
 - Take the file train_peptides.csv, train_proteins.csv, train_clinical_data.csv from Kaggle link in the Data Source section of this README. Place those files csv files in the ./data/raw/ directory
 - Create a python virtual environment
-- Use the Makefile to install requirements: 
+- Use the Makefile to install requirements:<br> 
 `$ make install`
-- CD into the src/ directory and run the prediciton pipeline: 
+- CD into the src/ directory and run the prediciton pipeline:<br>
 `$ python pred_pipeline.py`
 - This will process all of the raw data and run predictions with the trained models, which can be found in ./models/prod_models/, and a new file called full_updrs_preds.csv will be created in the ./data/predictions/ directory
    - The predictions will have the column names: 
@@ -35,22 +35,22 @@ Take the Kaggle dataset and get predictions for each of the patients
 Use your own input of protein and peptide data that is a .json file with "visit_month", "patient_id", and the protein and peptide names:values. Or use the examples in ./data/api_examples/ to return a prediction.
 
 - Create a virtual environment
-- Install the dependencies: 
+- Install the dependencies:<br> 
 `$ make install`
-- Change to the src directory: 
+- Change to the src directory:<br> 
 `$ cd src`
-- Run the prediction pipeline file with your data filepath: 
+- Run the prediction pipeline file with your data filepath:<br> 
 `$ python pred_pipeline_user_input.py file/path/to/data.json`
 - The raw data and predictions are stored in ./data/predictions/ with the name {visit_id}_predictions.json
  - If "visit_id" is in the input data file keys then that will be used, otherwise "visit_id" is the {patient_id}_{visit_month}
 
 #### Option 3:
 Take user input of protein and peptide data and perform a prediction, or use the example .json files from ./data/api_examples/ to return a prediction.
-- Build the docker image: 
+- Build the docker image:<br> 
 `docker build -t parkinsons-predict .`
-- Confirm the docker images is listed: 
+- Confirm the docker images is listed:<br> 
 `docker images parkinsons-predict`
-- Run the docker container in port 5000: 
+- Run the docker container in port 5000:<br>
 `docker run -p 5000:5000 -d --name parkinsons-predict parkinsons-predict`
 - Confirm it is running by visiting http://localhost:5000 in the web browser
  - It should read "Welcome to the Parkinsons Prediction API"
@@ -58,7 +58,7 @@ Take user input of protein and peptide data and perform a prediction, or use the
  - It should return a json string with the predictions and the visit_id
 - Make an API request with the example data:<br>
 `$ python api_request.py ./data/api_examples/16566_24_data.json`
-- Make an API request with your own json data: 
+- Make an API request with your own json data: <br>
 `$ python api_request.py file/path/to/data.json`
 - A json file will be stored in ./data/predictions/ with the name visit_id_prediction.json
 
