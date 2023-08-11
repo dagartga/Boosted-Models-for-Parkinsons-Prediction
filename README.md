@@ -42,7 +42,7 @@ Use your own input of protein and peptide data that is a .json file with "visit_
 - Run the prediction pipeline file with your data filepath:<br> 
 `$ python pred_pipeline_user_input.py file/path/to/data.json`
 - The raw data and predictions are stored in ./data/predictions/ with the name {visit_id}_predictions.json
- - If "visit_id" is in the input data file keys then that will be used, otherwise "visit_id" is the {patient_id}_{visit_month}
+    - If "visit_id" is in the input data file keys then that will be used, otherwise "visit_id" is the {patient_id}_{visit_month}
 
 #### Option 3:
 Take user input of protein and peptide data and perform a prediction, or use the example .json files from ./data/api_examples/ to return a prediction.
@@ -53,9 +53,9 @@ Take user input of protein and peptide data and perform a prediction, or use the
 - Run the docker container in port 5000:<br>
 `docker run -p 5000:5000 -d --name parkinsons-predict parkinsons-predict`
 - Confirm it is running by visiting http://localhost:5000 in the web browser
- - It should read "Welcome to the Parkinsons Prediction API"
+    - It should read "Welcome to the Parkinsons Prediction API"
 - Run a automatic test prediction by visiting http://localhost:5000/test_predict
- - It should return a json string with the predictions and the visit_id
+    - It should return a json string with the predictions and the visit_id
 - Make an API request with the example data:<br>
 `$ python api_request.py ./data/api_examples/16566_24_data.json`
 - Make an API request with your own json data: <br>
