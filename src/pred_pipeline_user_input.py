@@ -15,6 +15,7 @@ warnings.filterwarnings("ignore")
 def dump_json_file(file_path):
     try:
         with open(file_path, "r") as file:
+            # load the json file as a json object
             data = json.load(file)
             return data
     except FileNotFoundError:
@@ -240,16 +241,26 @@ def get_all_updrs_preds(input_data):
             )
 
         # concatenate the dataframes
-        final_df = pd.concat([info_df, prot_pep_df], axis=0)
+        final_df = pd.concat([info_df, prot_pep_df], axis=1)
+
+        # remove any duplicate columns
+        final_df = final_df.loc[:, ~final_df.columns.duplicated()].copy()
 
         # save the dataframe to a json file
         final_df.to_json(
-            f"./data/predictions/{input_df['visit_id'].values[0]}_prediction.json"
+            f"../data/predictions/{input_df['visit_id'].values[0]}_prediction.json"
         )
 
 
 if __name__ == "__main__":
     # import the data from the file path passed as an argument
-    input_data = load_json()
+    parser = argparse.ArgumentParser(description="Dump the contents of a JSON file.")
+    parser.add_argument("file_path", type=str, help="Path to the JSON file")
+    args = parser.parse_args()
 
+    file_path = args.file_path
+    data = dump_json_file(file_path)
+    input_data = json.loads(data)
+
+    # make predictions and save the dataframe to a json file in path ../data/predictions
     get_all_updrs_preds(input_data)

@@ -32,16 +32,22 @@ if __name__ == "__main__":
     url = "http://localhost:5000/predict"
 
     # import the data from the file path passed as an argument
-    data = load_json()
+    parser = argparse.ArgumentParser(description="Dump the contents of a JSON file.")
+    parser.add_argument("file_path", type=str, help="Path to the JSON file")
+    args = parser.parse_args()
+
+    file_path = args.file_path
+    data = dump_json_file(file_path)
+    input_data = json.loads(data)
 
     # store the visit_id for later use in file name
-    visit_id = data["visit_id"]
+    visit_id = input_data["visit_id"]
 
     # the content type
     headers = {"content-type": "application/json", "Accept-Charset": "UTF-8"}
 
     # Make the request and display the response
-    resp = requests.post(url, data, headers=headers)
+    resp = requests.post(url, input_data, headers=headers)
     print(resp.text)
 
     # save the response to a file as a json object
