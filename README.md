@@ -56,7 +56,7 @@ Take user input of protein and peptide data and perform a prediction, or use the
  - It should read "Welcome to the Parkinsons Prediction API"
 - Run a automatic test prediction by visiting http://localhost:5000/test_predict
  - It should return a json string with the predictions and the visit_id
-- Make an API request with the example data:
+- Make an API request with the example data:<br>
 `$ python api_request.py ./data/api_examples/16566_24_data.json`
 - Make an API request with your own json data: 
 `$ python api_request.py file/path/to/data.json`
