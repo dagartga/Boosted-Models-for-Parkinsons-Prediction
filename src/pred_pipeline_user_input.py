@@ -68,6 +68,14 @@ def fill_columns(df, updrs):
 def preprocess_input_data(input_data):
     input_df = pd.DataFrame(input_data, index=[0])
 
+    if "visit_id" not in input_df.columns:
+        visit_id = (
+            str(input_df["patient_id"].values[0])
+            + "_"
+            + str(input_df["visit_month"].values[0])
+        )
+        input_df["visit_id"] = visit_id
+
     # list of columns for information
     info_cols = [
         "visit_id",
@@ -248,7 +256,7 @@ def get_all_updrs_preds(input_data):
 
         # save the dataframe to a json file
         final_df.to_json(
-            f"../data/predictions/{input_df['visit_id'].values[0]}_prediction.json"
+            f"../data/predictions/{info_df['visit_id'].values[0]}_prediction.json"
         )
 
 
@@ -260,6 +268,7 @@ if __name__ == "__main__":
 
     file_path = args.file_path
     data = dump_json_file(file_path)
+
     input_data = json.loads(data)
 
     # make predictions and save the dataframe to a json file in path ../data/predictions
