@@ -71,13 +71,13 @@ Take user input of protein and peptide data and perform a prediction, or use the
 ### Notebook Descriptions
 
 - Compare_medication_SMOTE_1yr_Models
-    - This notebook compares the performance of models that were trained using SMOTE data, including the medication data, for visits that fall within 12 months or less. These models were tuned using the hyperopt package. Two of the final models are in this notebook.
+    - This notebook trains the models using SMOTE data, including the medication data, for visits that fall within 12 months or less. The notebook then compares these models. These models use hyperparameters values that were optimized using the hyperopt package. Two of the final models are in this notebook.
 
 - Compare_medication_SMOTE_1yr_Baseline_Models
-    - This notebook compares the performance of models using the default parameters. The data for evaluation includes the SMOTE data and medication data for visits that fall within 12 months or less.
+    - This notebook trains and compares the performance of models using the default parameters. The data for evaluation includes the SMOTE data and medication data for visits that fall within 12 months or less.
 
 - Compare_SMOTE_1yr_Models:
-    - This notebook compares the performance of models that were trained using SMOTE data, but without medication data, for visits that fall within 12 months or less. These models were tuned using the hyperopt package. One of the final models is in this notebook.
+    - This notebook trains the models using SMOTE data, with no medication data, for visits that fall within 12 months or less. The notebook then compares these models. These models use hyperparameters values that were optimized using the hyperopt package. Two of the final models are in this notebook.
 
 - Compare_finetune_1yr_Cat_Results:
     - This notebook compares the performance of models that were trained using data that did not have class imbalanced processing performed and without medication data for patient visits that fall within 12 months or less. These models were tuned manually.
@@ -89,14 +89,18 @@ Take user input of protein and peptide data and perform a prediction, or use the
     - This notebook compares the performance of models using their default settings on data that was not preprocessed and does not include any medication data and includes data from all patient visits.
 
 - Raw_Data_EDA:
+    - Prelimary EDA of the UPDRS values including value counts, histogram plots, correlations with each other and features, and UPDRS max value changes over time.
 
 - Patient_Data_EDA:
+    - Explores the distribution of patient visits, number of proteins with non-zero values for each class of patient, and subsampling the data to visit months of 12 or less and of 24 or less.
 
 - First_12_Months_EDA:
+    - Distribution of visit months and how many patients have their max UPDRS in the first 12 months and from which category.
 
 - EDA_RandomForest:
+    - Explores the data for regression analysis. Explores the medication data. Looks at the correlation between protein values and the UPRDS values. Also the linear relationship of the visit month and the UPDRS score as well as the visit month and the change in UPDRS score. 
 
-- 
+
 Project Organization
 ------------
 
