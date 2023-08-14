@@ -66,6 +66,35 @@ Take user input of protein and peptide data and perform a prediction, or use the
 - A json file will be stored in ./data/predictions/ with the name visit_id_prediction.json
 
 
+### Notebook Descriptions
+
+- Compare_medication_SMOTE_1yr_Models
+    - This notebook compares the performance of models that were trained using SMOTE data, including the medication data, for visits that fall within 12 months or less. These models were tuned using the hyperopt package. Two of the final models are in this notebook.
+
+- Compare_medication_SMOTE_1yr_Baseline_Models
+    - This notebook compares the performance of models using the default parameters. The data for evaluation includes the SMOTE data and medication data for visits that fall within 12 months or less.
+
+- Compare_SMOTE_1yr_Models:
+    - This notebook compares the performance of models that were trained using SMOTE data, but without medication data, for visits that fall within 12 months or less. These models were tuned using the hyperopt package. One of the final models is in this notebook.
+
+- Compare_finetune_1yr_Cat_Results:
+    - This notebook compares the performance of models that were trained using data that did not have class imbalanced processing performed and without medication data for patient visits that fall within 12 months or less. These models were tuned manually.
+
+- Compare_1yr_Cat_Results:
+    - This notebook compares the performance of models using their default settings on data that was not preprocessed and does not include any medication data for patient visits that fall within 12 months or less.
+
+- Compare_Categorical_Results:
+    - This notebook compares the performance of models using their default settings on data that was not preprocessed and does not include any medication data and includes data from all patient visits.
+
+- Raw_Data_EDA:
+
+- Patient_Data_EDA:
+
+- First_12_Months_EDA:
+
+- EDA_RandomForest:
+
+- 
 Project Organization
 ------------
 
