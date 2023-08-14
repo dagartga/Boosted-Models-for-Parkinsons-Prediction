@@ -11,6 +11,8 @@ Using the first 12 months of doctor's visits where protein mass spectometry data
 - updrs 4 was dropped due to too few samples for training
 
 ### Project Write-Up
+This project write-up contains the most detailed description of the EDA, data preprocessing techniques, model tuning techniques, and model performance. **Please read it get a full understanding of this project.**
+
 [Comparison of Three Boosting Models on Parkinsons Prediction](https://dagartga.github.io/parkinsons_project/)
 
 ### Data Source
