@@ -10,6 +10,9 @@ Using the first 12 months of doctor's visits where protein mass spectometry data
 - updrs 3 categorical ratings: 32 and below is mild, 33 to 58 is moderate, 59 and above is severe
 - updrs 4 was dropped due to too few samples for training
 
+### Project Write-Up
+[Comparison of Three Boosting Models on Parkinsons Prediction](https://dagartga.github.io/parkinsons_project/)
+
 ### Data Source
 The raw data can be found at [Kaggle Parkinsons Dataset](https://www.kaggle.com/competitions/amp-parkinsons-disease-progression-prediction/data)
 
@@ -20,20 +23,46 @@ The raw data can be found at [Kaggle Parkinsons Dataset](https://www.kaggle.com/
 Take the Kaggle dataset and get predictions for each of the patients
 - Take the file train_peptides.csv, train_proteins.csv, train_clinical_data.csv from Kaggle link in the Data Source section of this README. Place those files csv files in the ./data/raw/ directory
 - Create a python virtual environment
-- Use the Makefile to install requirements: `$ make install`
-- CD into the src/ directory and run the prediciton pipeline: `$ python pred_pipeline.py`
+- Use the Makefile to install requirements:<br> 
+`$ make install`
+- CD into the src/ directory and run the prediciton pipeline:<br>
+`$ python pred_pipeline.py`
 - This will process all of the raw data and run predictions with the trained models, which can be found in ./models/prod_models/, and a new file called full_updrs_preds.csv will be created in the ./data/predictions/ directory
    - The predictions will have the column names: 
     - "updrs_1_cat_preds" 
     - "updrs_2_cat_preds"
     - "updrs_3_cat_preds"
 
+
 #### Option 2:
+Use your own input of protein and peptide data that is a .json file with "visit_month", "patient_id", and the protein and peptide names:values. Or use the examples in ./data/api_examples/ to return a prediction.
+
+- Create a virtual environment
+- Install the dependencies:<br> 
+`$ make install`
+- Change to the src directory:<br> 
+`$ cd src`
+- Run the prediction pipeline file with your data filepath:<br> 
+`$ python pred_pipeline_user_input.py file/path/to/data.json`
+- The raw data and predictions are stored in ./data/predictions/ with the name {visit_id}_predictions.json
+    - If "visit_id" is in the input data file keys then that will be used, otherwise "visit_id" is the {patient_id}_{visit_month}
+
+#### Option 3:
 Take user input of protein and peptide data and perform a prediction, or use the example .json files from ./data/api_examples/ to return a prediction.
-- Build the docker image
-- Run the docker container in port 5000
+- Build the docker image:<br> 
+`docker build -t parkinsons-predict .`
+- Confirm the docker images is listed:<br> 
+`docker images parkinsons-predict`
+- Run the docker container in port 5000:<br>
+`docker run -p 5000:5000 -d --name parkinsons-predict parkinsons-predict`
 - Confirm it is running by visiting http://localhost:5000 in the web browser
-- Make an API request: `$ python api_request.py`
+    - It should read "Welcome to the Parkinsons Prediction API"
+- Run a automatic test prediction by visiting http://localhost:5000/test_predict
+    - It should return a json string with the predictions and the visit_id
+- Make an API request with the example data:<br>
+`$ python api_request.py ./data/api_examples/16566_24_data.json`
+- Make an API request with your own json data: <br>
+`$ python api_request.py file/path/to/data.json`
 - A json file will be stored in ./data/predictions/ with the name visit_id_prediction.json
 
 

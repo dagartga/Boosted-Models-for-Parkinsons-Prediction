@@ -47,7 +47,7 @@ if __name__ == "__main__":
     headers = {"content-type": "application/json", "Accept-Charset": "UTF-8"}
 
     # Make the request and display the response
-    resp = requests.post(url, input_data, headers=headers)
+    resp = requests.post(url, data, headers=headers)
     print(resp.text)
 
     # save the response to a file as a json object
