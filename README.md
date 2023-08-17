@@ -1,4 +1,4 @@
-parkinsons_prediction
+Boosted Models for Parkinsons Prediction
 ==============================
 
 ## Overview
