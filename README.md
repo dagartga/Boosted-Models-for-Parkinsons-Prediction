@@ -13,7 +13,7 @@ Using the first 12 months of doctor's visits where protein mass spectometry data
 ### Project Write-Up
 This project write-up contains the most detailed description of the EDA, data preprocessing techniques, model tuning techniques, and model performance. **Please read it get a full understanding of this project.**
 
-[Comparison of Three Boosting Models on Parkinsons Prediction](https://dagartga.github.io/parkinsons_project/)
+[Comparison of Three Boosting Models on Parkinsons Prediction](https://dagartga.github.io/Boosted-Models-for-Parkinsons-Prediction/)
 
 ### Data Source
 The raw data can be found at [Kaggle Parkinsons Dataset](https://www.kaggle.com/competitions/amp-parkinsons-disease-progression-prediction/data)
