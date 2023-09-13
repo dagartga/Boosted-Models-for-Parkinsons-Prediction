@@ -7,6 +7,7 @@ import json
 import pickle
 import warnings
 import argparse
+import os
 
 
 warnings.filterwarnings("ignore")
@@ -148,7 +149,10 @@ def add_med_data(info_df, prot_pep_df):
 
 def predict_updrs1(df):
     # Load the saved model
-    model = joblib.load("../models/catboost_updrs_1_model_hyperopt_smote.sav")
+    model_path = os.path.join(
+        "..", "models", "catboost_updrs_1_model_hyperopt_smote.sav"
+    )
+    model = joblib.load(model_path)
 
     # Make predictions on the test data
     X = df
@@ -165,7 +169,10 @@ def predict_updrs1(df):
 
 
 def predict_updrs2(df):
-    model = joblib.load("../models/catboost_updrs_2_model_hyperopt_smote_meds.sav")
+    model_path = os.path.join(
+        "..", "models", "catboost_updrs_2_model_hyperopt_smote_meds.sav"
+    )
+    model = joblib.load(model_path)
 
     # Make predictions on the data
     X = df
@@ -183,7 +190,9 @@ def predict_updrs2(df):
 
 def predict_updrs3(df):
     # Load the saved model
-    filename = "../models/lgboost_updrs_3_model_hyperopt_smote_meds.sav"
+    filename = os.path.join(
+        "..", "models", "lgboost_updrs_3_model_hyperopt_smote_meds.sav"
+    )
     model = pickle.load(open(filename, "rb"))
 
     # Make predictions on the data
@@ -254,10 +263,16 @@ def get_all_updrs_preds(input_data):
         # remove any duplicate columns
         final_df = final_df.loc[:, ~final_df.columns.duplicated()].copy()
 
-        # save the dataframe to a json file
-        final_df.to_json(
-            f"../data/predictions/{info_df['visit_id'].values[0]}_prediction.json"
+        # create file path
+        pred_file_path = os.path.join(
+            "..",
+            "data",
+            "predictions",
+            f"{info_df['visit_id'].values[0]}_prediction.json",
         )
+
+        # save the dataframe to a json file
+        final_df.to_json(pred_file_path)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,4 @@
-# catboost_future_cat_train.py
-
+import os
 import numpy as np
 import pandas as pd
 import pickle
@@ -58,12 +57,15 @@ def preprocess_categorical_df(df, target):
 
 
 if __name__ == "__main__":
+    # create file paths
+    updrs1_path = os.path.join("..", "data", "processed", "train_updrs_1_cat.csv")
+    updrs2_path = os.path.join("..", "data", "processed", "train_updrs_2_cat.csv")
+    updrs3_path = os.path.join("..", "data", "processed", "train_updrs_3_cat.csv")
+
     # read the training data
-    updrs1_df = pd.read_csv("../data/processed/train_updrs_1_cat.csv")
-
-    updrs2_df = pd.read_csv("../data/processed/train_updrs_2_cat.csv")
-
-    updrs3_df = pd.read_csv("../data/processed/train_updrs_3_cat.csv")
+    updrs1_df = pd.read_csv(updrs1_path)
+    updrs2_df = pd.read_csv(updrs2_path)
+    updrs3_df = pd.read_csv(updrs3_path)
 
     df = updrs1_df
     updrs = "updrs_1"
@@ -132,7 +134,10 @@ if __name__ == "__main__":
     # save the results
     updrs_results_df = pd.DataFrame(updrs_results)
 
-    # save as a csv file
-    updrs_results_df.to_csv(
-        "../data/processed/catboost_future_cat_hyperparam_results.csv", index=True
+    # file path for saving
+    catboost_hyperparams_path = os.path.join(
+        "..", "data", "processed", "catboost_future_cat_hyperparam_results.csv"
     )
+
+    # save as a csv file
+    updrs_results_df.to_csv(catboost_hyperparams_path, index=True)

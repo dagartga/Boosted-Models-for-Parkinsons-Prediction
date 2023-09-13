@@ -3,6 +3,7 @@ import numpy as np
 import joblib
 import pickle
 import warnings
+import os
 from data.make_dataset import preprocess_train_df
 
 warnings.filterwarnings("ignore")
@@ -147,7 +148,10 @@ def predict_updrs1(df):
         df: the dataframe with the updrs_1_cat_preds column added
     """
     # Load the saved model
-    model = joblib.load("../models/catboost_updrs_1_model_hyperopt_smote.sav")
+    model_path = os.path.join(
+        "..", "models", "catboost_updrs_1_model_hyperopt_smote.sav"
+    )
+    model = joblib.load(model_path)
 
     # Make predictions on the test data
     X = df.drop(columns=["updrs_1_cat", "kfold", "visit_id", "patient_id", "updrs_1"])
@@ -175,7 +179,10 @@ def predict_updrs2(df):
     Returns:
         df: the dataframe with the updrs_2_cat_preds column added
     """
-    model = joblib.load("../models/catboost_updrs_2_model_hyperopt_smote_meds.sav")
+    model_path = os.path.join(
+        "..", "models", "catboost_updrs_2_model_hyperopt_smote_meds.sav"
+    )
+    model = joblib.load(model_path)
 
     # Make predictions on the test data
     X = df.drop(columns=["updrs_2_cat", "kfold", "visit_id", "patient_id", "updrs_2"])
@@ -204,7 +211,9 @@ def predict_updrs3(df):
         df: the dataframe with the updrs_3_cat_preds column added
     """
     # Load the saved model
-    filename = "../models/lgboost_updrs_3_model_hyperopt_smote_meds.sav"
+    filename = os.path.join(
+        "..", "models", "lgboost_updrs_3_model_hyperopt_smote_meds.sav"
+    )
 
     # model = pickle.load(open(filename, "rb"))
     model = joblib.load(filename)
@@ -227,9 +236,14 @@ def predict_updrs3(df):
 
 
 if __name__ == "__main__":
-    train_clin_df = pd.read_csv("../data/raw/train_clinical_data.csv")
-    train_prot_df = pd.read_csv("../data/raw/train_proteins.csv")
-    train_pep_df = pd.read_csv("../data/raw/train_peptides.csv")
+    # read in the data
+    train_clin_path = os.path.join("..", "data", "raw", "train_clinical_data.csv")
+    train_prot_path = os.path.join("..", "data", "raw", "train_proteins.csv")
+    train_pep_path = os.path.join("..", "data", "raw", "train_peptides.csv")
+
+    train_clin_df = pd.read_csv(train_clin_path)
+    train_prot_df = pd.read_csv(train_prot_path)
+    train_pep_df = pd.read_csv(train_pep_path)
 
     proc_dfs = preprocess_train_df(
         train_clin_df, train_prot_df, train_pep_df, save_data=False
@@ -264,4 +278,5 @@ if __name__ == "__main__":
     )
 
     # save the dataframe as a csv
-    updrs_preds.to_csv("../data/predictions/full_updrs_preds.csv", index=False)
+    file_path = os.path.join("..", "data", "predictions", "full_updrs_preds.csv")
+    updrs_preds.to_csv(file_path, index=False)

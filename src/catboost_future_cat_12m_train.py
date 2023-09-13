@@ -1,5 +1,4 @@
-# xgboost_train.py
-
+import os
 import numpy as np
 import pandas as pd
 import pickle
@@ -82,10 +81,13 @@ def convert_df_to_1yr(df, updrs):
 
 if __name__ == "__main__":
     # read the training data
+    updrs1_file_path = os.path.join("..", "data", "processed", "train_updrs_1_cat.csv")
+    updrs2_file_path = os.path.join("..", "data", "processed", "train_updrs_2_cat.csv")
+    updrs3_file_path = os.path.join("..", "data", "processed", "train_updrs_3_cat.csv")
     # read in the protein and updrs data
-    updrs1_df = pd.read_csv("../data/processed/train_updrs_1_cat.csv")
-    updrs2_df = pd.read_csv("../data/processed/train_updrs_2_cat.csv")
-    updrs3_df = pd.read_csv("../data/processed/train_updrs_3_cat.csv")
+    updrs1_df = pd.read_csv(updrs1_file_path)
+    updrs2_df = pd.read_csv(updrs2_file_path)
+    updrs3_df = pd.read_csv(updrs3_file_path)
 
     # replace the categorical updrs scores with numerical for mild, moderate and severe
     ## combine the moderate and severe categories since there are very few severe observations
@@ -171,6 +173,7 @@ if __name__ == "__main__":
     updrs_results_df = pd.DataFrame(updrs_results)
 
     # save as a csv file
-    updrs_results_df.to_csv(
-        "../data/processed/catboost_future_cat_12m_hyperparam_results.csv", index=True
+    save_catboost_hyperparams_path = os.path.join(
+        "..", "data", "processed", "catboost_future_cat_12m_hyperparam_results.csv"
     )
+    updrs_results_df.to_csv(save_catboost_hyperparams_path, index=True)

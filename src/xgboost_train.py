@@ -1,5 +1,4 @@
-# xgboost_train.py
-
+import os
 import numpy as np
 import pandas as pd
 import xgboost as xgb
@@ -68,12 +67,15 @@ def optmize(params, param_names, x, y):
 
 
 if __name__ == "__main__":
+    # create file paths
+    updrs1_path = os.path.join("..", "data", "processed", "train_updrs_1_cat.csv")
+    updrs2_path = os.path.join("..", "data", "processed", "train_updrs_2_cat.csv")
+    updrs3_path = os.path.join("..", "data", "processed", "train_updrs_3_cat.csv")
+
     # read the training data
-    updrs1_df = pd.read_csv("../data/processed/train_updrs_1.csv")
-
-    updrs2_df = pd.read_csv("../data/processed/train_updrs_2.csv")
-
-    updrs3_df = pd.read_csv("../data/processed/train_updrs_3.csv")
+    updrs1_df = pd.read_csv(updrs1_path)
+    updrs2_df = pd.read_csv(updrs2_path)
+    updrs3_df = pd.read_csv(updrs3_path)
 
     for updrs, df in zip(
         ["updrs_1", "updrs_2", "updrs_3"], [updrs1_df, updrs2_df, updrs3_df]
@@ -130,7 +132,10 @@ if __name__ == "__main__":
         best_params = pd.DataFrame(columns=["updrs", "params"])
         best_params["updrs"] = [updrs]
         best_params["params"] = [hopt]
+        best_params_path = os.path.join(
+            "..", "models", "model_results", f"xgboost_best_params_{updrs}.csv"
+        )
         best_params.to_csv(
-            f"~/parkinsons_proj_1/parkinsons_project/parkinsons_1/models/model_results/xgboost_best_params_{updrs}.csv",
+            best_params_path,
             index=False,
         )

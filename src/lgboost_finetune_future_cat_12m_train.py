@@ -113,38 +113,50 @@ def cross_fold_validation(df, model, target):
 
 def convert_df_to_1yr(df, updrs):
     # get the max category for each patient
-    max_df = df.groupby(['patient_id'])[f'{updrs}_cat'].max().reset_index()
-    max_df = max_df.rename(columns={f'{updrs}_cat': f'{updrs}_max_cat'})
+    max_df = df.groupby(["patient_id"])[f"{updrs}_cat"].max().reset_index()
+    max_df = max_df.rename(columns={f"{updrs}_cat": f"{updrs}_max_cat"})
     # merge the max category with the original dataframe
-    updrs_df = df.merge(max_df, on=['patient_id'], how='left')
+    updrs_df = df.merge(max_df, on=["patient_id"], how="left")
     # take only the visit months that are 12 or less
-    updrs_yr_df = updrs_df[updrs_df['visit_month'] <= 12]
-    updrs_yr_df = updrs_yr_df.drop(columns=[f'{updrs}_cat'])
-    updrs_yr_df.rename(columns={f'{updrs}_max_cat': f'{updrs}_cat'}, inplace=True)
-    
+    updrs_yr_df = updrs_df[updrs_df["visit_month"] <= 12]
+    updrs_yr_df = updrs_yr_df.drop(columns=[f"{updrs}_cat"])
+    updrs_yr_df.rename(columns={f"{updrs}_max_cat": f"{updrs}_cat"}, inplace=True)
+
     return updrs_yr_df
 
 
 if __name__ == "__main__":
+    # create file paths
+    updrs1_path = os.path.join("..", "data", "processed", "train_updrs_1_cat.csv")
+    updrs2_path = os.path.join("..", "data", "processed", "train_updrs_2_cat.csv")
+    updrs3_path = os.path.join("..", "data", "processed", "train_updrs_3_cat.csv")
+
     # read the training data
-    # read in the protein and updrs data
-    updrs1_df = pd.read_csv('../data/processed/train_updrs_1_cat.csv')
-    updrs2_df = pd.read_csv('../data/processed/train_updrs_2_cat.csv')
-    updrs3_df = pd.read_csv('../data/processed/train_updrs_3_cat.csv')
+    updrs1_df = pd.read_csv(updrs1_path)
+
+    updrs2_df = pd.read_csv(updrs2_path)
+
+    updrs3_df = pd.read_csv(updrs3_path)
 
     # replace the categorical updrs scores with numerical for mild, moderate and severe
     ## combine the moderate and severe categories since there are very few severe observations
-    updrs1_df['updrs_1_cat'] = updrs1_df['updrs_1_cat'].map({'mild': 0, 'moderate': 1, 'severe': 1})
-    updrs2_df['updrs_2_cat'] = updrs2_df['updrs_2_cat'].map({'mild': 0, 'moderate': 1, 'severe': 1})
-    updrs3_df['updrs_3_cat'] = updrs3_df['updrs_3_cat'].map({'mild': 0, 'moderate': 1, 'severe': 1})
+    updrs1_df["updrs_1_cat"] = updrs1_df["updrs_1_cat"].map(
+        {"mild": 0, "moderate": 1, "severe": 1}
+    )
+    updrs2_df["updrs_2_cat"] = updrs2_df["updrs_2_cat"].map(
+        {"mild": 0, "moderate": 1, "severe": 1}
+    )
+    updrs3_df["updrs_3_cat"] = updrs3_df["updrs_3_cat"].map(
+        {"mild": 0, "moderate": 1, "severe": 1}
+    )
 
-    updrs1_df = convert_df_to_1yr(updrs1_df, 'updrs_1')
-    updrs2_df = convert_df_to_1yr(updrs2_df, 'updrs_2')
-    updrs3_df = convert_df_to_1yr(updrs3_df, 'updrs_3')
+    updrs1_df = convert_df_to_1yr(updrs1_df, "updrs_1")
+    updrs2_df = convert_df_to_1yr(updrs2_df, "updrs_2")
+    updrs3_df = convert_df_to_1yr(updrs3_df, "updrs_3")
 
-    updrs1_df = updrs1_df.drop(columns=['kfold'])
-    updrs2_df = updrs2_df.drop(columns=['kfold'])
-    updrs3_df = updrs3_df.drop(columns=['kfold'])
+    updrs1_df = updrs1_df.drop(columns=["kfold"])
+    updrs2_df = updrs2_df.drop(columns=["kfold"])
+    updrs3_df = updrs3_df.drop(columns=["kfold"])
 
     # params to test
     # bagging_freq = [1, 3, 5, 7, 9] # needs bagging_fraction also
@@ -206,8 +218,11 @@ if __name__ == "__main__":
         y_train = label_encoder.fit_transform(y_train)
         y_test = label_encoder.fit_transform(y_test)
 
+        lgb_hyperparam_path = os.path.join(
+            "..", "data", "processed", "lgboost_future_cat_12m_hyperparam_results.csv"
+        )
         lgb_hyperparams_df = pd.read_csv(
-            "../data/processed/lgboost_future_cat_12m_hyperparam_results.csv",
+            lgb_hyperparam_path,
             index_col=0,
         )
 
@@ -228,7 +243,10 @@ if __name__ == "__main__":
             test_params_df.loc[i, "recall"] = recall
             i += 1
 
-        # save the results
-        test_params_df.to_csv(
-            f"./models/lgboost_12m_hyperparam_finetune_results_{updrs}.csv", index=True
+        # save file path
+        save_lgboost_hyperparam_path = os.path.join(
+            ".", "models", f"lgboost_12m_hyperparam_finetune_results_{updrs}.csv"
         )
+
+        # save the results
+        test_params_df.to_csv(save_lgboost_hyperparam_path, index=True)

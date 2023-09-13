@@ -1,5 +1,4 @@
-# xgboost_train.py
-
+import os
 import numpy as np
 import pandas as pd
 import pickle
@@ -100,6 +99,7 @@ if __name__ == "__main__":
     updrs_results_df = pd.DataFrame(updrs_results)
 
     # save as a csv file
-    updrs_results_df.to_csv(
-        "../data/processed/lgboost_cat_hyperparam_results.csv", index=True
+    lgb_hyperparam_path = os.path.join(
+        "..", "data", "processed", "lgboost_cat_hyperparam_results.csv"
     )
+    updrs_results_df.to_csv(lgb_hyperparam_path, index=True)

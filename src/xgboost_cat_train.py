@@ -1,5 +1,4 @@
-# xgboost_train.py
-
+import os
 import numpy as np
 import pandas as pd
 import pickle
@@ -37,12 +36,15 @@ def hyperparameter_tuning(
 
 
 if __name__ == "__main__":
+    # create file paths
+    updrs1_path = os.path.join("..", "data", "processed", "train_updrs_1_cat.csv")
+    updrs2_path = os.path.join("..", "data", "processed", "train_updrs_2_cat.csv")
+    updrs3_path = os.path.join("..", "data", "processed", "train_updrs_3_cat.csv")
+
     # read the training data
-    updrs1_df = pd.read_csv("../data/processed/train_updrs_1_cat.csv")
-
-    updrs2_df = pd.read_csv("../data/processed/train_updrs_2_cat.csv")
-
-    updrs3_df = pd.read_csv("../data/processed/train_updrs_3_cat.csv")
+    updrs1_df = pd.read_csv(updrs1_path)
+    updrs2_df = pd.read_csv(updrs2_path)
+    updrs3_df = pd.read_csv(updrs3_path)
 
     updrs_results = dict()
 
@@ -100,6 +102,7 @@ if __name__ == "__main__":
     updrs_results_df = pd.DataFrame(updrs_results)
 
     # save as a csv file
-    updrs_results_df.to_csv(
-        "../data/processed/xgboost_cat_hyperparam_results.csv", index=True
+    xgboost_hyperparam_file_path = os.path.join(
+        "..", "data", "processed", "xgboost_cat_hyperparam_results.csv"
     )
+    updrs_results_df.to_csv(xgboost_hyperparam_file_path, index=True)
