@@ -8,5 +8,6 @@ hyperopt==0.2.7
 flask
 streamlit==1.29.0
 streamlit_lottie==0.0.5
+seaborn==0.13.0
 
 
