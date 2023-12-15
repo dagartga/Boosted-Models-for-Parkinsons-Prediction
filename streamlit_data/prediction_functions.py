@@ -233,9 +233,15 @@ def get_all_updrs_preds(input_data, verbose=True):
 
 if __name__ == "__main__":
     # create the predictions for the full dataset and store them in a csv
-    updrs1_df = pd.read_csv("../data/processed/train_updrs_1.csv")
-    updrs2_df = pd.read_csv("../data/processed/train_updrs_2.csv")
-    updrs3_df = pd.read_csv("../data/processed/train_updrs_3.csv")
+    updrs1_df = pd.read_csv("../data/processed/train_updrs_1_cat.csv")
+    updrs2_df = pd.read_csv("../data/processed/train_updrs_2_cat.csv")
+    updrs3_df = pd.read_csv("../data/processed/train_updrs_3_cat.csv")
+    
+    updrs1_df = updrs1_df[updrs1_df['visit_month'] <= 12]
+    updrs2_df = updrs2_df[updrs2_df['visit_month'] <= 12]
+    updrs3_df = updrs3_df[updrs3_df['visit_month'] <= 12]
+    
+    
     (
         updrs1_df["updrs_1_max_cat_preds"],
         updrs2_df["updrs_2_max_cat_preds"],

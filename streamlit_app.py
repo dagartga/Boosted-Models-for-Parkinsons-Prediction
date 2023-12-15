@@ -52,15 +52,11 @@ with tab1:
 with tab2:
     
     # read in the protein and updrs data
-    updrs1_df = pd.read_csv('./data/processed/train_updrs_1_cat.csv')
-    updrs2_df = pd.read_csv('./data/processed/train_updrs_2_cat.csv')
-    updrs3_df = pd.read_csv('./data/processed/train_updrs_3_cat.csv')
+    updrs1_df = pd.read_csv('./streamlit_data/full_pred_updrs_1.csv')
+    updrs2_df = pd.read_csv('./streamlit_data/full_pred_updrs_2.csv')
+    updrs3_df = pd.read_csv('./streamlit_data/full_pred_updrs_3.csv')
     
-    # get only the 12 months of patient data
-    updrs1_df = updrs1_df[updrs1_df['visit_month'] <= 12]
-    updrs2_df = updrs2_df[updrs2_df['visit_month'] <= 12]
-    updrs3_df = updrs3_df[updrs3_df['visit_month'] <= 12]
-    
+    patient_id = updrs1_df['patient_id'].unique()[0]
     st.header('Parkinsons Severity Prediction')
     patient_id = st.selectbox('Patient ID', updrs1_df.sort_values(by='patient_id')['patient_id'].unique())
     patient_updrs1_df = updrs1_df[updrs1_df['patient_id'] == patient_id]
@@ -68,8 +64,55 @@ with tab2:
     patient_updrs3_df = updrs3_df[updrs3_df['patient_id'] == patient_id]
 
     
-    # get the predictions
-    updrs_preds = get_all_updrs_preds(patient_updrs1_df, col_dir='./dataframe_cols/')
+    # updrs values by visit month
+    visit_updrs1_df = patient_updrs1_df[['updrs_1', 'visit_month']].rename(columns={'updrs_1': 'value'})
+    visit_updrs2_df = patient_updrs2_df[['updrs_2', 'visit_month']].rename(columns={'updrs_2': 'value'})
+    visit_updrs3_df = patient_updrs3_df[['updrs_3', 'visit_month']].rename(columns={'updrs_3': 'value'})
+    (visit_updrs1_df['updrs'], visit_updrs2_df['updrs'], visit_updrs3_df['updrs']) = ('UPDRS 1', 'UPDRS 2', 'UPDRS 3')
+    
+    updrs_vals = pd.concat([visit_updrs1_df[['updrs', 'value', 'visit_month']], 
+                            visit_updrs2_df[['updrs', 'value', 'visit_month']], 
+                            visit_updrs3_df[['updrs', 'value', 'visit_month']]], axis=0)
 
-    # convert preds to json
-    #predictions = updrs_preds.to_json(orient="records")
+    # display dataframe of predicted updrs and the visit month
+    st.write('**UPDRS Max Predictions**')
+    pred_df = pd.merge(patient_updrs1_df[['visit_month', 'updrs_1_max_cat_preds']], 
+                        patient_updrs2_df[['visit_month', 'updrs_2_max_cat_preds']], on='visit_month')
+    pred_df = pd.merge(pred_df, patient_updrs3_df[['visit_month', 'updrs_3_max_cat_preds']], on='visit_month')
+    pred_df = pred_df.sort_values(by=['visit_month']).set_index('visit_month')
+    st.dataframe(pred_df.rename(columns={'updrs_1_max_cat_preds': 'Max Predicted UPDRS 1',
+                                         'updrs_2_max_cat_preds': 'Max Predicted UPDRS 2',
+                                         'updrs_3_max_cat_preds': 'Max Predicted UPDRS 3'}))
+    
+    # write the max updrs value predicted
+    max_updrs1 = patient_updrs1_df['updrs_1_max_cat_preds'].values.max()
+    max_updrs2 = patient_updrs2_df['updrs_2_max_cat_preds'].values.max()
+    max_updrs3 = patient_updrs3_df['updrs_3_max_cat_preds'].values.max()
+    
+    max_updrs1 = 'Moderate-to-Severe' if max_updrs1 == 1 else 'None-to-Mild'
+    max_updrs2 = 'Moderate-to-Severe' if max_updrs2 == 1 else 'None-to-Mild'
+    max_updrs3 = 'Moderate-to-Severe' if max_updrs3 == 1 else 'None-to-Mild'
+        
+    st.write(f'**UPDRS 1 Max Prediction**: {max_updrs1}')
+    st.write(f'**UPDRS 2 Max Prediction**: {max_updrs2}')
+    st.write(f'**UPDRS 3 Max Prediction**: {max_updrs3}')
+    
+    if patient_updrs1_df['visit_month'].nunique() > 1:
+        # plot the updrs values by visit month
+        fig, ax = plt.subplots(figsize=(10, 5))
+        sns.lineplot(data=updrs_vals, x='visit_month', y='value', hue='updrs', ax=ax)
+        ax.set_title(f'UPDRS Values for Patient {patient_id}')
+        ax.set_xlabel('Visit Month')
+        ax.set_ylabel('UPDRS Value')
+        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+        st.pyplot(fig)
+    else:
+        st.markdown('*Only One Visit for this Patient*')
+        # plot as a bar chart
+        fig, ax = plt.subplots(figsize=(10, 5))
+        sns.barplot(data=updrs_vals, x='updrs', y='value', hue='visit_month', ax=ax)
+        ax.set_title(f'UPDRS Values for Patient {patient_id}')
+        ax.set_xlabel('UPDRS')
+        ax.set_ylabel('UPDRS Value')
+        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., title='Visit Month')
+        st.pyplot(fig)
