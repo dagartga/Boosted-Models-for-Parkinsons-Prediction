@@ -7,6 +7,8 @@ import seaborn as sns
 from lightgbm import LGBMClassifier
 from catboost import CatBoostClassifier
 import json
+import joblib
+import pickle
 from webapp.pred_pipeline_user_input_app import get_all_updrs_preds
 
 
@@ -116,3 +118,34 @@ with tab2:
         ax.set_ylabel('UPDRS Value')
         plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., title='Visit Month')
         st.pyplot(fig)
+        
+        
+        
+    # import the input data used for modeling
+    input_updrs1_df = pd.read_csv('./streamlit_data/updrs_1_model_input.csv')
+    input_updrs2_df = pd.read_csv('./streamlit_data/updrs_2_model_input.csv')
+    input_updrs3_df = pd.read_csv('./streamlit_data/updrs_3_model_input.csv')
+    
+    
+    # UPDRS 1
+    # Load the saved model
+    model = joblib.load("./webapp/catboost_updrs_1_model_hyperopt_smote.sav")
+
+    # Make predictions on the data
+    preds = model.predict(input_updrs1_df)
+    
+    
+    # UPDRS 2
+    # Load the saved model
+    model = joblib.load("./webapp/catboost_updrs_2_model_hyperopt_smote_meds.sav")
+    # make predictions on the data
+    preds = model.predict(input_updrs2_df)
+    
+    
+    # UPDRS 3
+    # Load the saved model
+    filename = "./webapp/lgboost_updrs_3_model_hyperopt_smote_meds.sav"
+    model = pickle.load(open(filename, "rb"))
+
+    # Make predictions on the data
+    preds = model.predict(input_updrs3_df)
