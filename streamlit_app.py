@@ -54,7 +54,6 @@ with tab1:
 
 with tab2:
     
-    import pandas as pd
     # read in the protein and updrs data
     updrs1_df = pd.read_csv('./streamlit_data/full_pred_updrs_1.csv')
     updrs2_df = pd.read_csv('./streamlit_data/full_pred_updrs_2.csv')
@@ -65,7 +64,6 @@ with tab2:
     input_updrs2_df = pd.read_csv('./streamlit_data/updrs_2_model_input.csv')
     input_updrs3_df = pd.read_csv('./streamlit_data/updrs_3_model_input.csv')
     
-    patient_id = updrs1_df['patient_id'].unique()[0]
     st.header('Parkinsons Severity Prediction')
     patient_id = st.selectbox('Patient ID', updrs1_df.sort_values(by='patient_id')['patient_id'].unique())
     patient_updrs1_df = updrs1_df[updrs1_df['patient_id'] == patient_id]
@@ -134,7 +132,8 @@ with tab2:
     # Load the saved model
     model = joblib.load("./webapp/catboost_updrs_1_model_hyperopt_smote.sav")
     # filter out the input data for the patient
-    input_updrs1_df = input_updrs1_df[input_updrs1_df['patient_id'] == patient_id].drop(columns=['patient_id'])
+    drop_col = ['patient_id', 'upd23b_clinical_state_on_medication_On', 'upd23b_clinical_state_on_medication_Unknown']
+    input_updrs1_df = input_updrs1_df[input_updrs1_df['patient_id'] == patient_id].drop(columns=drop_col)
     # filter for the visit month
     input_updrs1_df = input_updrs1_df[input_updrs1_df['visit_month'] == visit_month]
     # make predictions on the data
@@ -159,6 +158,8 @@ with tab2:
     st.pyplot(fig)
 
     
+    
+    
     st.subheader('UPDRS 2')
     # UPDRS 2
     # Load the saved model
@@ -169,6 +170,7 @@ with tab2:
     input_updrs2_df = input_updrs2_df[input_updrs2_df['visit_month'] == visit_month]
     # make predictions on the data
     # preds = model.predict(input_updrs2_df)
+    
     
     # plot the shap values
     # explain the model's predictions using SHAP values
@@ -201,6 +203,7 @@ with tab2:
     # make predictions on the data
     # preds = model.predict(input_updrs3_df)
     
+
     # plot the shap values
     # explain the model's predictions using SHAP values
     explainer = shap.TreeExplainer(model)
