@@ -254,11 +254,21 @@ if __name__ == "__main__":
         updrs1_df.loc[i, "updrs_1_max_cat_preds"] = max_preds[
             "updrs_1_max_cat_preds"
         ].values[0]
+        
+        if i == 0:
+            final_input_df1 = input_df1
+            final_input_df1['patient_id'] = row['patient_id']
+        else:
+            input_df1['patient_id'] = row['patient_id']
+            final_input_df1 = pd.concat([final_input_df1, input_df1], axis=0)
 
-    # wrte the predictions to csv
+    # write the predictions to csv
     updrs1_df.to_csv("full_pred_updrs_1.csv", index=False)
+    
+    # drop any columns with _max_cat_preds in them
+    final_input_df1 = final_input_df1.loc[:, ~final_input_df1.columns.str.contains('_max_cat_preds')]
     # write preprocessed input data to csv
-    input_df1.to_csv("updrs_1_model_input.csv", index=False)
+    final_input_df1.to_csv("updrs_1_model_input.csv", index=False)
 
     for i, row in updrs2_df.iterrows():
         input_data = row.to_dict()
@@ -266,11 +276,20 @@ if __name__ == "__main__":
         updrs2_df.loc[i, "updrs_2_max_cat_preds"] = max_preds[
             "updrs_2_max_cat_preds"
         ].values[0]
+        
+        if i == 0:
+            final_input_df2 = input_df2
+            final_input_df2['patient_id'] = row['patient_id']
+        else:
+            input_df2['patient_id'] = row['patient_id']
+            final_input_df2 = pd.concat([final_input_df2, input_df2], axis=0)
 
     # wrte the predictions to csv
     updrs2_df.to_csv("full_pred_updrs_2.csv", index=False)
+    # drop any columns with _max_cat_preds in them
+    final_input_df2 = final_input_df2.loc[:, ~final_input_df2.columns.str.contains('_max_cat_preds')]
     # write preprocessed input data to csv
-    input_df2.to_csv("updrs_2_model_input.csv", index=False)
+    final_input_df2.to_csv("updrs_2_model_input.csv", index=False)
 
     for i, row in updrs3_df.iterrows():
         input_data = row.to_dict()
@@ -278,8 +297,17 @@ if __name__ == "__main__":
         updrs3_df.loc[i, "updrs_3_max_cat_preds"] = max_preds[
             "updrs_3_max_cat_preds"
         ].values[0]
+        
+        if i == 0:
+            final_input_df3 = input_df3
+            final_input_df3['patient_id'] = row['patient_id']
+        else:
+            input_df3['patient_id'] = row['patient_id']
+            final_input_df3 = pd.concat([final_input_df3, input_df3], axis=0)
 
     # write the predictions to csv
     updrs3_df.to_csv("full_pred_updrs_3.csv", index=False)
+    # drop any columns with _max_cat_preds in them
+    final_input_df3 = final_input_df3.loc[:, ~final_input_df3.columns.str.contains('_max_cat_preds')]
     # write preprocessed input data to csv
-    input_df3.to_csv("updrs_3_model_input.csv", index=False)
+    final_input_df3.to_csv("updrs_3_model_input.csv", index=False)
