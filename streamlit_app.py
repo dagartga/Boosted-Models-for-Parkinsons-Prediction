@@ -222,3 +222,16 @@ with tab2:
     plt.xlabel('')
     st.pyplot(fig)
     
+with tab3:
+    
+    # show the feature importances from the saved png files
+    st.header('Feature Importances')
+    st.subheader('UPDRS 1')
+    st.image('./webapp/updrs_1_feat_imp.png')
+    
+    st.subheader('UPDRS 2')
+    st.image('./webapp/updrs_2_feat_imp.png')
+    
+    st.subheader('UPDRS 3')
+    st.image('./webapp/updrs_3_feat_imp.png')
+        
