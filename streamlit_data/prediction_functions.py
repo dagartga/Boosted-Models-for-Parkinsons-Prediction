@@ -228,14 +228,20 @@ def get_all_updrs_preds(input_data, verbose=True):
 
     updrs_preds["visit_id"] = visit_id
 
-    return updrs_preds
+    return updrs_preds, updrs_df
 
 
 if __name__ == "__main__":
     # create the predictions for the full dataset and store them in a csv
-    updrs1_df = pd.read_csv("../data/processed/train_updrs_1.csv")
-    updrs2_df = pd.read_csv("../data/processed/train_updrs_2.csv")
-    updrs3_df = pd.read_csv("../data/processed/train_updrs_3.csv")
+    updrs1_df = pd.read_csv("../data/processed/train_updrs_1_cat.csv")
+    updrs2_df = pd.read_csv("../data/processed/train_updrs_2_cat.csv")
+    updrs3_df = pd.read_csv("../data/processed/train_updrs_3_cat.csv")
+    
+    updrs1_df = updrs1_df[updrs1_df['visit_month'] <= 12]
+    updrs2_df = updrs2_df[updrs2_df['visit_month'] <= 12]
+    updrs3_df = updrs3_df[updrs3_df['visit_month'] <= 12]
+    
+    
     (
         updrs1_df["updrs_1_max_cat_preds"],
         updrs2_df["updrs_2_max_cat_preds"],
@@ -244,30 +250,64 @@ if __name__ == "__main__":
 
     for i, row in updrs1_df.iterrows():
         input_data = row.to_dict()
-        max_preds = get_all_updrs_preds(input_data, verbose=False)
+        max_preds, input_df1 = get_all_updrs_preds(input_data, verbose=False)
         updrs1_df.loc[i, "updrs_1_max_cat_preds"] = max_preds[
             "updrs_1_max_cat_preds"
         ].values[0]
+        
+        if i == 0:
+            final_input_df1 = input_df1
+            final_input_df1['patient_id'] = row['patient_id']
+        else:
+            input_df1['patient_id'] = row['patient_id']
+            final_input_df1 = pd.concat([final_input_df1, input_df1], axis=0)
 
-    # wrte the predictions to csv
+    # write the predictions to csv
     updrs1_df.to_csv("full_pred_updrs_1.csv", index=False)
+    
+    # drop any columns with _max_cat_preds in them
+    final_input_df1 = final_input_df1.loc[:, ~final_input_df1.columns.str.contains('_max_cat_preds')]
+    # write preprocessed input data to csv
+    final_input_df1.to_csv("updrs_1_model_input.csv", index=False)
 
     for i, row in updrs2_df.iterrows():
         input_data = row.to_dict()
-        max_preds = get_all_updrs_preds(input_data, verbose=False)
+        max_preds, input_df2 = get_all_updrs_preds(input_data, verbose=False)
         updrs2_df.loc[i, "updrs_2_max_cat_preds"] = max_preds[
             "updrs_2_max_cat_preds"
         ].values[0]
+        
+        if i == 0:
+            final_input_df2 = input_df2
+            final_input_df2['patient_id'] = row['patient_id']
+        else:
+            input_df2['patient_id'] = row['patient_id']
+            final_input_df2 = pd.concat([final_input_df2, input_df2], axis=0)
 
     # wrte the predictions to csv
     updrs2_df.to_csv("full_pred_updrs_2.csv", index=False)
+    # drop any columns with _max_cat_preds in them
+    final_input_df2 = final_input_df2.loc[:, ~final_input_df2.columns.str.contains('_max_cat_preds')]
+    # write preprocessed input data to csv
+    final_input_df2.to_csv("updrs_2_model_input.csv", index=False)
 
     for i, row in updrs3_df.iterrows():
         input_data = row.to_dict()
-        max_preds = get_all_updrs_preds(input_data, verbose=False)
+        max_preds, input_df3 = get_all_updrs_preds(input_data, verbose=False)
         updrs3_df.loc[i, "updrs_3_max_cat_preds"] = max_preds[
             "updrs_3_max_cat_preds"
         ].values[0]
+        
+        if i == 0:
+            final_input_df3 = input_df3
+            final_input_df3['patient_id'] = row['patient_id']
+        else:
+            input_df3['patient_id'] = row['patient_id']
+            final_input_df3 = pd.concat([final_input_df3, input_df3], axis=0)
 
     # write the predictions to csv
     updrs3_df.to_csv("full_pred_updrs_3.csv", index=False)
+    # drop any columns with _max_cat_preds in them
+    final_input_df3 = final_input_df3.loc[:, ~final_input_df3.columns.str.contains('_max_cat_preds')]
+    # write preprocessed input data to csv
+    final_input_df3.to_csv("updrs_3_model_input.csv", index=False)
