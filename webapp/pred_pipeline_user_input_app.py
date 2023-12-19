@@ -12,9 +12,9 @@ import argparse
 warnings.filterwarnings("ignore")
 
 
-def fill_columns(df, updrs, col_dir="./"):
+def fill_columns(df, updrs):
     # get the columns for updrs from updrs_cols.txt
-    with open(f"{col_dir}{updrs}_cols.txt", "r") as f:
+    with open(f"{updrs}_cols.txt", "r") as f:
         updrs_cols = json.load(f)
 
     info_cols = [
@@ -166,14 +166,14 @@ def predict_updrs3(df):
     return df
 
 
-def get_all_updrs_preds(input_data, col_dir="./"):
+def get_all_updrs_preds(input_data):
     # convert the json input to a dataframe
     input_df = pd.DataFrame(input_data, index=[0])
 
     visit_id = input_df["visit_id"].values[0]
 
     for updrs in ["updrs_1", "updrs_2", "updrs_3"]:
-        with open(f"{col_dir}{updrs}_cols.txt", "r") as f:
+        with open(f"{updrs}_cols.txt", "r") as f:
             cols = json.load(f)
 
         if updrs in input_df.columns:
@@ -181,7 +181,7 @@ def get_all_updrs_preds(input_data, col_dir="./"):
         if "kfold" in input_df.columns:
             input_df = input_df.drop(columns=["kfold"])
 
-        full_input = fill_columns(input_df, updrs, col_dir=col_dir)
+        full_input = fill_columns(input_df, updrs)
 
         info_df, prot_pep_df = preprocess_input_data(full_input)
 
