@@ -12,7 +12,8 @@ import pickle
 import shap
 from webapp.pred_pipeline_user_input_app import get_all_updrs_preds
 
-st.set_page_config(layout='centered')
+st.set_page_config(layout="centered")
+
 
 def load_lottiefile(filepath: str):
     with open(filepath, "r") as f:
@@ -20,12 +21,20 @@ def load_lottiefile(filepath: str):
     return lottie_json
 
 
-filename = load_lottiefile("doctor_animation.json")
+filename = load_lottiefile("./streamlit_data/doctor_animation.json")
 st_lottie(filename, speed=1, height=200)
 
 st.title("Parkinsons Severity Prediction")
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["Prediction", "Overview", "UPDRS 1 Proteins", "UPDRS 2 Proteins", "UPDRS 3 Proteins"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(
+    [
+        "Prediction",
+        "Overview",
+        "UPDRS 1 Proteins",
+        "UPDRS 2 Proteins",
+        "UPDRS 3 Proteins",
+    ]
+)
 
 
 with tab2:
@@ -195,7 +204,9 @@ with tab1:
     visit_month = st.selectbox("Visit Month", patient_updrs1_df["visit_month"].unique())
 
     st.header("Explanation of Model Predictions")
-    st.write('The following plots show the top ten features that contribute to the model prediction for the inputed patient and visit month. The features are ranked by their SHAP values.')
+    st.write(
+        "The following plots show the top ten features that contribute to the model prediction for the inputed patient and visit month. The features are ranked by their SHAP values."
+    )
     st.subheader("UPDRS 1")
 
     # UPDRS 1
@@ -212,7 +223,7 @@ with tab1:
     )
     # filter for the visit month
     input_updrs1_df = input_updrs1_df[input_updrs1_df["visit_month"] == visit_month]
-    
+
     # make predictions on the data
     # preds = model.predict(input_updrs1_df)
 
@@ -235,7 +246,9 @@ with tab1:
         y="feature",
         ax=ax,
     )
-    plt.title("Features (Proteins) Towards Severe UPDRS 1 Model Prediction", fontsize=14)
+    plt.title(
+        "Features (Proteins) Towards Severe UPDRS 1 Model Prediction", fontsize=14
+    )
     plt.ylabel("")
     plt.xlabel("")
     st.pyplot(fig)
@@ -310,7 +323,9 @@ with tab1:
         y="feature",
         ax=ax,
     )
-    plt.title("Features (Proteins) Towards Severe UPDRS 3 Model Prediction", fontsize=14)
+    plt.title(
+        "Features (Proteins) Towards Severe UPDRS 3 Model Prediction", fontsize=14
+    )
     plt.ylabel("")
     plt.xlabel("")
     st.pyplot(fig)
@@ -328,23 +343,27 @@ with tab3:
     plt.ylabel("")
     plt.xlabel("")
     st.pyplot(fig)
-    
+
     # import the Uniprot data
     uniprot_df = pd.read_csv("./webapp/UniprotProteinLookup.csv")
     # combine the protein and the uniprot data
-    top_ten_updrs1_feats['protein'] = top_ten_updrs1_feats['feature'].apply(lambda x: x.split("_")[1] if "_" in x else x)   
-    top_ten_updrs1_feats = pd.merge(top_ten_updrs1_feats, uniprot_df, left_on='protein', right_on='UniProt')
-    top_ten_updrs1_feats = top_ten_updrs1_feats.fillna('Unknown')
+    top_ten_updrs1_feats["protein"] = top_ten_updrs1_feats["feature"].apply(
+        lambda x: x.split("_")[1] if "_" in x else x
+    )
+    top_ten_updrs1_feats = pd.merge(
+        top_ten_updrs1_feats, uniprot_df, left_on="protein", right_on="UniProt"
+    )
+    top_ten_updrs1_feats = top_ten_updrs1_feats.fillna("Unknown")
     # display the protein information
     st.subheader("Top Proteins for UPDRS 1 Information")
-    st.write('A protein is missing it is because it is not in the Uniprot database')
-    st.write('-------------------')
+    st.write("A protein is missing it is because it is not in the Uniprot database")
+    st.write("-------------------")
     for i, row in top_ten_updrs1_feats.iterrows():
         st.markdown(f"**Protein Peptide**: {row['feature']}")
         st.markdown(f"**Protein Name**: {row['Protein names']}")
         st.markdown(f"**Gene Name**: {row['Gene Names']}")
         st.markdown(f"**Length**: {row['Length']}")
-        st.write('-------------------')
+        st.write("-------------------")
 
 with tab4:
     # show the feature importances from the saved csv files
@@ -359,25 +378,29 @@ with tab4:
     plt.ylabel("")
     plt.xlabel("")
     st.pyplot(fig)
-    
+
     # combine the protein and the uniprot data
-    top_ten_updrs2_feats['protein'] = top_ten_updrs2_feats['feature'].apply(lambda x: x.split("_")[1] if "_" in x else x)    
-    top_ten_updrs2_feats = pd.merge(top_ten_updrs2_feats, uniprot_df, left_on='protein', right_on='UniProt')
-    top_ten_updrs2_feats = top_ten_updrs2_feats.fillna('Unknown')
+    top_ten_updrs2_feats["protein"] = top_ten_updrs2_feats["feature"].apply(
+        lambda x: x.split("_")[1] if "_" in x else x
+    )
+    top_ten_updrs2_feats = pd.merge(
+        top_ten_updrs2_feats, uniprot_df, left_on="protein", right_on="UniProt"
+    )
+    top_ten_updrs2_feats = top_ten_updrs2_feats.fillna("Unknown")
     # display the protein information
     # display the protein information
     st.subheader("Top Proteins for UPDRS 2 Information")
-    st.write('A protein is missing it is because it is not in the Uniprot database')
-    st.write('-------------------')
+    st.write("A protein is missing it is because it is not in the Uniprot database")
+    st.write("-------------------")
     for i, row in top_ten_updrs2_feats.iterrows():
         st.markdown(f"**Protein Peptide**: {row['feature']}")
         st.markdown(f"**Protein Name**: {row['Protein names']}")
         st.markdown(f"**Gene Name**: {row['Gene Names']}")
         st.markdown(f"**Length**: {row['Length']}")
-        st.write('-------------------')
+        st.write("-------------------")
 
 with tab5:
-     # show the feature importances from the saved csv files
+    # show the feature importances from the saved csv files
     st.header("Feature Importances")
     st.subheader("UPDRS 3")
     updrs3_feat_imp = pd.read_csv("./webapp/updrs_3_feat_imp.csv")
@@ -391,17 +414,21 @@ with tab5:
     st.pyplot(fig)
 
     # combine the protein and the uniprot data
-    top_ten_updrs3_feats['protein'] = top_ten_updrs3_feats['feature'].apply(lambda x: x.split("_")[1] if "_" in x else x)
-    top_ten_updrs3_feats = pd.merge(top_ten_updrs3_feats, uniprot_df, left_on='protein', right_on='UniProt')
-    top_ten_updrs3_feats = top_ten_updrs3_feats.fillna('Unknown')
+    top_ten_updrs3_feats["protein"] = top_ten_updrs3_feats["feature"].apply(
+        lambda x: x.split("_")[1] if "_" in x else x
+    )
+    top_ten_updrs3_feats = pd.merge(
+        top_ten_updrs3_feats, uniprot_df, left_on="protein", right_on="UniProt"
+    )
+    top_ten_updrs3_feats = top_ten_updrs3_feats.fillna("Unknown")
     # display the protein information
     # display the protein information
     st.subheader("Top Proteins for UPDRS 3 Information")
-    st.write('A protein is missing it is because it is not in the Uniprot database')
-    st.write('-------------------')
+    st.write("A protein is missing it is because it is not in the Uniprot database")
+    st.write("-------------------")
     for i, row in top_ten_updrs3_feats.iterrows():
         st.markdown(f"**Protein Peptide**: {row['feature']}")
         st.markdown(f"**Protein Name**: {row['Protein names']}")
         st.markdown(f"**Gene Name**: {row['Gene Names']}")
         st.markdown(f"**Length**: {row['Length']}")
-        st.write('-------------------')
+        st.write("-------------------")
