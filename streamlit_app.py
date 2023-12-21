@@ -210,6 +210,7 @@ with tab2:
     )
     # filter for the visit month
     input_updrs1_df = input_updrs1_df[input_updrs1_df["visit_month"] == visit_month]
+    
     # make predictions on the data
     # preds = model.predict(input_updrs1_df)
 
@@ -313,13 +314,37 @@ with tab2:
     st.pyplot(fig)
 
 with tab3:
-    # show the feature importances from the saved png files
+    # show the feature importances from the saved csv files
     st.header("Feature Importances")
     st.subheader("UPDRS 1")
-    st.image("./webapp/updrs_1_feat_imp.png")
+    updrs1_feat_imp = pd.read_csv("./webapp/updrs_1_feat_imp.csv")
+    updrs1_feat_imp = updrs1_feat_imp.sort_values(by="importance", ascending=False)
+    top_ten_updrs1_feats = updrs1_feat_imp.head(10)
+    fig, ax = plt.subplots()
+    sns.barplot(data=top_ten_updrs1_feats, x="importance", y="feature", ax=ax)
+    plt.title("Top Ten Features for UPDRS 1 Model", fontsize=14)
+    plt.ylabel("")
+    plt.xlabel("")
+    st.pyplot(fig)
 
     st.subheader("UPDRS 2")
-    st.image("./webapp/updrs_2_feat_imp.png")
+    updrs2_feat_imp = pd.read_csv("./webapp/updrs_2_feat_imp.csv")
+    updrs2_feat_imp = updrs2_feat_imp.sort_values(by="importance", ascending=False)
+    top_ten_updrs2_feats = updrs2_feat_imp.head(10)
+    fig, ax = plt.subplots()
+    sns.barplot(data=top_ten_updrs2_feats, x="importance", y="feature", ax=ax)
+    plt.title("Top Ten Features for UPDRS 2 Model", fontsize=14)
+    plt.ylabel("")
+    plt.xlabel("")
+    st.pyplot(fig)
 
     st.subheader("UPDRS 3")
-    st.image("./webapp/updrs_3_feat_imp.png")
+    updrs3_feat_imp = pd.read_csv("./webapp/updrs_3_feat_imp.csv")
+    updrs3_feat_imp = updrs3_feat_imp.sort_values(by="importance", ascending=False)
+    top_ten_updrs3_feats = updrs3_feat_imp.head(10)
+    fig, ax = plt.subplots()
+    sns.barplot(data=top_ten_updrs3_feats, x="importance", y="feature", ax=ax)
+    plt.title("Top Ten Features for UPDRS 3 Model", fontsize=14)
+    plt.ylabel("")
+    plt.xlabel("")
+    st.pyplot(fig)
