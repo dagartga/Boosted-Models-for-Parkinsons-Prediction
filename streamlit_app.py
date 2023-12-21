@@ -112,8 +112,9 @@ with tab1:
     # display dataframe of predicted updrs and the visit month
     st.write("**UPDRS Max Predictions**")
     st.write(
-        "The model uses only the protein and peptide data from visit months 0 - 12 to predict whether the patient will have moderate-to-severe max UPDRS rating"
+        "**The model uses only the protein and peptide data from visit months 0 - 12 to predict whether the patient will have moderate-to-severe max UPDRS rating**"
     )
+    st.write('Below you can see the "Max Predicted UPDRS Score" for each UPDRS')
     pred_df = pd.merge(
         patient_updrs1_df[["visit_month", "updrs_1_max_cat_preds"]],
         patient_updrs2_df[["visit_month", "updrs_2_max_cat_preds"]],
