@@ -24,10 +24,10 @@ st_lottie(filename, speed=1, height=200)
 
 st.title("Parkinsons Severity Prediction")
 
-tab1, tab2, tab3 = st.tabs(["Overview", "Prediction", "Data"])
+tab1, tab2, tab3 = st.tabs(["Prediction", "Overview", "Protein Exploration"])
 
 
-with tab1:
+with tab2:
     st.header("Project Overview")
     """
     Using the first 12 months of doctor's visits where protein mass spectometry data has been recorded, 
@@ -51,7 +51,7 @@ with tab1:
     """
 
 
-with tab2:
+with tab1:
     # read in the protein and updrs data
     updrs1_df = pd.read_csv("./streamlit_data/full_pred_updrs_1.csv")
     updrs2_df = pd.read_csv("./streamlit_data/full_pred_updrs_2.csv")
@@ -326,6 +326,20 @@ with tab3:
     plt.ylabel("")
     plt.xlabel("")
     st.pyplot(fig)
+    
+    # user selects the protein to explore
+    protein1 = st.selectbox("Protein", updrs1_feat_imp["feature"].unique())
+    # import the Uniprot data
+    uniprot_df = pd.read_csv("./webapp/UniprotProteinLookup.csv")
+    prot1_no_peptide = protein1.split("_")[0]
+    try:
+        uniprot1_df = uniprot_df[uniprot_df["UniProt"] == prot1_no_peptide]
+        st.write("Protein Name:", uniprot1_df["Protein names"].values[0])
+        st.write("Gene Name:", uniprot1_df["Gene Names"].values[0])
+        st.write("Length:", uniprot1_df["Length"].values[0])
+    except:
+        st.markdown("*Protein Not Found*")
+    
 
     st.subheader("UPDRS 2")
     updrs2_feat_imp = pd.read_csv("./webapp/updrs_2_feat_imp.csv")
@@ -337,6 +351,18 @@ with tab3:
     plt.ylabel("")
     plt.xlabel("")
     st.pyplot(fig)
+    
+    # user selects the protein to explore
+    protein2 = st.selectbox("Protein", updrs2_feat_imp["feature"].unique())
+    
+    prot2_no_peptide = protein2.split("_")[0]
+    try:
+        uniprot2_df = uniprot_df[uniprot_df["UniProt"] == prot2_no_peptide]
+        st.write("Protein Name:", uniprot2_df["Protein names"].values[0])
+        st.write("Gene Name:", uniprot2_df["Gene Names"].values[0])
+        st.write("Length:", uniprot2_df["Length"].values[0])
+    except:
+        st.markdown("*Protein Not Found*")
 
     st.subheader("UPDRS 3")
     updrs3_feat_imp = pd.read_csv("./webapp/updrs_3_feat_imp.csv")
@@ -348,3 +374,15 @@ with tab3:
     plt.ylabel("")
     plt.xlabel("")
     st.pyplot(fig)
+
+    # user selects the protein to explore
+    protein3 = st.selectbox("Protein", updrs3_feat_imp["feature"].unique())
+
+    prot3_no_peptide = protein3.split("_")[0]
+    try:
+        uniprot3_df = uniprot_df[uniprot_df["UniProt"] == prot3_no_peptide]
+        st.write("Protein Name:", uniprot3_df["Protein names"].values[0])
+        st.write("Gene Name:", uniprot3_df["Gene Names"].values[0])
+        st.write("Length:", uniprot3_df["Length"].values[0])
+    except:
+        st.markdown("*Protein Not Found*")
