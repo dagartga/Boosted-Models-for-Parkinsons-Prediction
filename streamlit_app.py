@@ -111,6 +111,9 @@ with tab1:
 
     # display dataframe of predicted updrs and the visit month
     st.write("**UPDRS Max Predictions**")
+    st.write(
+        "The model uses only the protein and peptide data from visit months 0 - 12 to predict whether the patient will have moderate-to-severe max UPDRS rating"
+    )
     pred_df = pd.merge(
         patient_updrs1_df[["visit_month", "updrs_1_max_cat_preds"]],
         patient_updrs2_df[["visit_month", "updrs_2_max_cat_preds"]],
@@ -166,6 +169,7 @@ with tab1:
     # filter out the input data for the patient
     patient_values = patient_updrs_df[patient_updrs_df["patient_id"] == patient_id]
 
+    st.write("**View all of actual UPDRS values for the patient below:**")
     if patient_values["visit_month"].nunique() > 1:
         # plot the updrs values by visit month
         fig, ax = plt.subplots(figsize=(10, 5))
@@ -205,7 +209,7 @@ with tab1:
 
     st.header("Explanation of Model Predictions")
     st.write(
-        "The following plots show the top ten features that contribute to the model prediction for the inputed patient and visit month. The features are ranked by their SHAP values."
+        "The following plots show the **top ten features (proteins)** that contributed to the model prediction for the **inputed patient and visit month**. The features are ranked by their SHAP values."
     )
     st.subheader("UPDRS 1")
 
