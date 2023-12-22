@@ -1,7 +1,11 @@
 Boosted Models for Parkinsons Prediction
 ==============================
 
-#### View the Web App here: [Parkinsons Prediction App](https://boosted-models-for-parkinsons-prediction.streamlit.app/)
+#### View the Web App here: 
+
+[Parkinsons Prediction App](https://boosted-models-for-parkinsons-prediction.streamlit.app/)
+
+![streamlit_app_screenshot](./webapp/web_app_screenshot.png)
 
 ### Project Write-Up
 This project write-up contains the most detailed description of the EDA, data preprocessing techniques, model tuning techniques, and model performance. **Please read it get a full understanding of this project.**
