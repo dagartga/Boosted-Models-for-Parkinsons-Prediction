@@ -22,7 +22,7 @@ Using the first 12 months of doctor's visits where protein mass spectometry data
 - [Parkinsons Project Write-Up](./Parkinsons_Project_Write_Up.pdf)
 
 
-### Data Source
+## Data Source
 The raw data can be found at [Kaggle Parkinsons Dataset](https://www.kaggle.com/competitions/amp-parkinsons-disease-progression-prediction/data)
 
 ## To Use this Project
