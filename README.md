@@ -17,6 +17,10 @@ Using the first 12 months of doctor's visits where protein mass spectometry data
 - updrs 3 categorical ratings: 32 and below is mild, 33 to 58 is moderate, 59 and above is severe
 - updrs 4 was dropped due to too few samples for training
 
+## Project Write-Up
+**For an in-depth look at the project view the following document:**
+- [Parkinsons Project Write-Up](./Parkinsons_Project_Write_Up.pdf)
+
 
 ### Data Source
 The raw data can be found at [Kaggle Parkinsons Dataset](https://www.kaggle.com/competitions/amp-parkinsons-disease-progression-prediction/data)
