@@ -7,8 +7,6 @@ Boosted Models for Parkinsons Prediction
 
 ![streamlit_app_screenshot](./webapp/web_app_screenshot.png)
 
-<img src="https://github.com/dagartga/Boosted-Models-for-Parkinsons-Prediction/blob/main/src/visualization/parkinsons_app.gif" width="40" height="40" />
-
 
 
 ## Overview
