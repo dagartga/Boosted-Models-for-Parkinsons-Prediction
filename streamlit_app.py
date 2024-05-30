@@ -113,7 +113,7 @@ with tab1:
     """ ### UPDRS Max Predictions
     **The model uses only the protein and peptide data from visit months 0 - 12 to predict whether the patient will have moderate-to-severe max UPDRS rating**
     
-    Below you can see the "Max Predicted UPDRS Score" for each UPDRS
+    Below you can see the **"Max Predicted UPDRS Score"** for each UPDRS
     """
 
     pred_df = pd.merge(
